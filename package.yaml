@@ -9,6 +9,8 @@ copyright:           "2024 JoyOfHardware"
 extra-source-files:
 - README.md
 - CHANGELOG.md
+data-files:
+- test/corpus/*
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
@@ -19,11 +21,19 @@ extra-source-files:
 # common to point users to the README.md file.
 description:         Please see the README on GitHub at <https://github.com/JoyOfHardware/haskellator#readme>
 
+default-extensions:
+- LambdaCase
+- TupleSections
+- ViewPatterns
+
 dependencies:
 - base >= 4.7 && < 5
+- filepath
+- text
 
 ghc-options:
 - -Wall
+- -O2
 - -Wcompat
 - -Widentities
 - -Wincomplete-record-updates
@@ -37,7 +47,7 @@ library:
   source-dirs: src
 
 executables:
-  haskellator-exe:
+  rtlil-parse:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
@@ -57,3 +67,6 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - haskellator
+    - tasty
+    - tasty-golden
+    - directory

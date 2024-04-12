@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Lib
+import qualified RTLIL
 
 main :: IO ()
-main = someFunc
+main = RTLIL.main
