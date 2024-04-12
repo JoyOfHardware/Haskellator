@@ -19,5 +19,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: haskell-actions/hlint-setup@v1
+      - uses: haskell-actions/hlint-setup@v2
       - uses: haskell-actions/hlint-run@v2
