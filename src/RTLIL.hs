@@ -5,6 +5,8 @@ module RTLIL
     ) where
 
 import RTLIL.Flags (Flag (..))
+import RTLIL.Parse (parseFile)
+import qualified RTLIL.Syntax as IL
 
 import Control.Monad (when, forM_)
 import Control.Monad.IO.Class (MonadIO (liftIO))
@@ -17,6 +19,7 @@ import System.IO (stderr)
 
 import qualified Data.Text    as T
 import qualified Data.Text.IO as T
+import qualified Data.Attoparsec.Text as AP
 
 mainOptions :: [OptDescr Flag]
 mainOptions =
@@ -41,6 +44,9 @@ exitUsage msgs = do
 
 run :: MonadIO m => [Flag] -> [FilePath] -> m ()
 run flags args = forM_ args $ \ f -> do
+      when verbose $ do
+            pInfo $ "Parsing file: " <> T.pack f
+      _ <- parseFile f -- TODO
       fout <- getOutFile f
       when verbose $ do
             pInfo $ "Writing to file: " <> T.pack fout

@@ -23,6 +23,7 @@ data-files:
     test/corpus/opt_lut_elim.il
     test/corpus/opt_lut_port.gold
     test/corpus/opt_lut_port.il
+    test/corpus/wires.txt
     test/corpus/xprop_add_5s3_3_uut.gold
     test/corpus/xprop_add_5s3_3_uut.il
     test/corpus/xprop_add_5s3_3_wrapped.gold
@@ -722,6 +723,8 @@ library
   exposed-modules:
       RTLIL
       RTLIL.Flags
+      RTLIL.Parse
+      RTLIL.Syntax
   other-modules:
       Paths_haskellator
   hs-source-dirs:
@@ -732,8 +735,10 @@ library
       ViewPatterns
   ghc-options: -Wall -O2 -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
+      attoparsec
+    , base >=4.7 && <5
     , filepath
+    , prettyprinter
     , text
   default-language: Haskell2010
 
@@ -749,9 +754,11 @@ executable rtlil-parse
       ViewPatterns
   ghc-options: -Wall -O2 -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      attoparsec
+    , base >=4.7 && <5
     , filepath
     , haskellator
+    , prettyprinter
     , text
   default-language: Haskell2010
 
@@ -768,10 +775,12 @@ test-suite haskellator-test
       ViewPatterns
   ghc-options: -Wall -O2 -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      attoparsec
+    , base >=4.7 && <5
     , directory
     , filepath
     , haskellator
+    , prettyprinter
     , tasty
     , tasty-golden
     , text
