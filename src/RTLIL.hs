@@ -6,7 +6,6 @@ module RTLIL
 
 import RTLIL.Flags (Flag (..))
 import RTLIL.Parse (parseFile)
-import qualified RTLIL.Syntax as IL
 
 import Control.Monad (when, forM_)
 import Control.Monad.IO.Class (MonadIO (liftIO))
@@ -17,16 +16,24 @@ import System.Exit (exitFailure)
 import System.FilePath ((-<.>))
 import System.IO (stderr)
 
-import qualified Data.Text    as T
-import qualified Data.Text.IO as T
-import qualified Data.Attoparsec.Text as AP
+import qualified Data.Text                 as T
+import qualified Data.Text.IO              as T
+import qualified Prettyprinter             as P
+import qualified Prettyprinter.Render.Text as P
 
 mainOptions :: [OptDescr Flag]
 mainOptions =
       [ Option ['v'] ["verbose"]          (NoArg  FlagV)              "More verbose output."
       , Option ['h'] ["help"]             (NoArg  FlagH)              "Print this message."
+      , Option ['p'] ["pretty"]           (NoArg  FlagP)              "Write pretty-printed output instead of AST (for testing)."
       , Option ['o'] []                   (ReqArg FlagO "file.out")   "Output file name."
       ]
+
+layoutOptions :: P.LayoutOptions
+layoutOptions = P.defaultLayoutOptions { P.layoutPageWidth = P.AvailablePerLine 120 1.0 }
+
+prettyPrint :: P.Pretty a => a -> Text
+prettyPrint = P.renderStrict . P.layoutSmart layoutOptions . P.pretty
 
 pInfo :: MonadIO m => Text -> m ()
 pInfo = liftIO . T.putStrLn
@@ -40,17 +47,25 @@ pFatal m = pErr m >> liftIO exitFailure
 exitUsage :: MonadIO m => [Text] -> m a
 exitUsage msgs = do
       mapM_ pErr msgs
-      pFatal (T.pack $ usageInfo "Usage: rtlil [OPTION...] <filename>" mainOptions)
+      pFatal (T.pack $ usageInfo "Usage: rtlil-parse [OPTION...] <filename>" mainOptions)
 
 run :: MonadIO m => [Flag] -> [FilePath] -> m ()
 run flags args = forM_ args $ \ f -> do
-      when verbose $ do
-            pInfo $ "Parsing file: " <> T.pack f
-      _ <- parseFile f -- TODO
+      when verbose $ pInfo $ "Parsing file: " <> T.pack f
+
+      result <- parseFile f >>= either pFatal pure
       fout <- getOutFile f
+
       when verbose $ do
-            pInfo $ "Writing to file: " <> T.pack fout
-      liftIO $ T.writeFile fout ""
+            pInfo $ "AST: "
+            pInfo $ T.pack $ show result
+
+      when verbose $ do
+            pInfo $ "Pretty: "
+            pInfo $ prettyPrint result
+
+      when verbose $ pInfo $ "Writing to file: " <> T.pack fout
+      liftIO $ T.writeFile fout $ if writePretty then prettyPrint result else T.pack $ show result
 
       where getOutFile :: MonadIO m => String -> m String
             getOutFile filename = case filter flagO flags of
@@ -67,6 +82,9 @@ run flags args = forM_ args $ \ f -> do
 
             verbose :: Bool
             verbose = FlagV `elem` flags
+
+            writePretty :: Bool
+            writePretty = FlagP `elem` flags
 
 main :: IO ()
 main = do

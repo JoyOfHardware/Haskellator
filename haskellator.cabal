@@ -19,700 +19,354 @@ extra-source-files:
     README.md
     CHANGELOG.md
 data-files:
-    test/corpus/opt_lut_elim.gold
     test/corpus/opt_lut_elim.il
-    test/corpus/opt_lut_port.gold
     test/corpus/opt_lut_port.il
+    test/corpus/opt_lut_port.out
     test/corpus/wires.txt
-    test/corpus/xprop_add_5s3_3_uut.gold
     test/corpus/xprop_add_5s3_3_uut.il
-    test/corpus/xprop_add_5s3_3_wrapped.gold
     test/corpus/xprop_add_5s3_3_wrapped.il
-    test/corpus/xprop_add_5s3_3_wrapped_xprop.gold
     test/corpus/xprop_add_5s3_3_wrapped_xprop.il
-    test/corpus/xprop_add_5u3_3_uut.gold
     test/corpus/xprop_add_5u3_3_uut.il
-    test/corpus/xprop_add_5u3_3_wrapped.gold
     test/corpus/xprop_add_5u3_3_wrapped.il
-    test/corpus/xprop_add_5u3_3_wrapped_xprop.gold
     test/corpus/xprop_add_5u3_3_wrapped_xprop.il
-    test/corpus/xprop_and_1s1_2_uut.gold
     test/corpus/xprop_and_1s1_2_uut.il
-    test/corpus/xprop_and_1s1_2_wrapped.gold
     test/corpus/xprop_and_1s1_2_wrapped.il
-    test/corpus/xprop_and_1s1_2_wrapped_xprop.gold
     test/corpus/xprop_and_1s1_2_wrapped_xprop.il
-    test/corpus/xprop_and_1u1_1_uut.gold
     test/corpus/xprop_and_1u1_1_uut.il
-    test/corpus/xprop_and_1u1_1_wrapped.gold
     test/corpus/xprop_and_1u1_1_wrapped.il
-    test/corpus/xprop_and_1u1_1_wrapped_xprop.gold
     test/corpus/xprop_and_1u1_1_wrapped_xprop.il
-    test/corpus/xprop_and_2u2_2_uut.gold
     test/corpus/xprop_and_2u2_2_uut.il
-    test/corpus/xprop_and_2u2_2_wrapped.gold
     test/corpus/xprop_and_2u2_2_wrapped.il
-    test/corpus/xprop_and_2u2_2_wrapped_xprop.gold
     test/corpus/xprop_and_2u2_2_wrapped_xprop.il
-    test/corpus/xprop_bmux_1_2_uut.gold
     test/corpus/xprop_bmux_1_2_uut.il
-    test/corpus/xprop_bmux_1_2_wrapped.gold
     test/corpus/xprop_bmux_1_2_wrapped.il
-    test/corpus/xprop_bmux_1_2_wrapped_xprop.gold
     test/corpus/xprop_bmux_1_2_wrapped_xprop.il
-    test/corpus/xprop_bmux_2_2_uut.gold
     test/corpus/xprop_bmux_2_2_uut.il
-    test/corpus/xprop_bmux_2_2_wrapped.gold
     test/corpus/xprop_bmux_2_2_wrapped.il
-    test/corpus/xprop_bmux_2_2_wrapped_xprop.gold
     test/corpus/xprop_bmux_2_2_wrapped_xprop.il
-    test/corpus/xprop_bmux_3_1_uut.gold
     test/corpus/xprop_bmux_3_1_uut.il
-    test/corpus/xprop_bmux_3_1_wrapped.gold
     test/corpus/xprop_bmux_3_1_wrapped.il
-    test/corpus/xprop_bmux_3_1_wrapped_xprop.gold
     test/corpus/xprop_bmux_3_1_wrapped_xprop.il
-    test/corpus/xprop_bweqx_1_uut.gold
     test/corpus/xprop_bweqx_1_uut.il
-    test/corpus/xprop_bweqx_1_wrapped.gold
     test/corpus/xprop_bweqx_1_wrapped.il
-    test/corpus/xprop_bweqx_1_wrapped_xprop.gold
     test/corpus/xprop_bweqx_1_wrapped_xprop.il
-    test/corpus/xprop_bweqx_3_uut.gold
     test/corpus/xprop_bweqx_3_uut.il
-    test/corpus/xprop_bweqx_3_wrapped.gold
     test/corpus/xprop_bweqx_3_wrapped.il
-    test/corpus/xprop_bweqx_3_wrapped_xprop.gold
     test/corpus/xprop_bweqx_3_wrapped_xprop.il
-    test/corpus/xprop_bwmux_1_uut.gold
     test/corpus/xprop_bwmux_1_uut.il
-    test/corpus/xprop_bwmux_1_wrapped.gold
     test/corpus/xprop_bwmux_1_wrapped.il
-    test/corpus/xprop_bwmux_1_wrapped_xprop.gold
     test/corpus/xprop_bwmux_1_wrapped_xprop.il
-    test/corpus/xprop_bwmux_3_uut.gold
     test/corpus/xprop_bwmux_3_uut.il
-    test/corpus/xprop_bwmux_3_wrapped.gold
     test/corpus/xprop_bwmux_3_wrapped.il
-    test/corpus/xprop_bwmux_3_wrapped_xprop.gold
     test/corpus/xprop_bwmux_3_wrapped_xprop.il
-    test/corpus/xprop_demux_1_2_uut.gold
     test/corpus/xprop_demux_1_2_uut.il
-    test/corpus/xprop_demux_1_2_wrapped.gold
     test/corpus/xprop_demux_1_2_wrapped.il
-    test/corpus/xprop_demux_1_2_wrapped_xprop.gold
     test/corpus/xprop_demux_1_2_wrapped_xprop.il
-    test/corpus/xprop_demux_2_2_uut.gold
     test/corpus/xprop_demux_2_2_uut.il
-    test/corpus/xprop_demux_2_2_wrapped.gold
     test/corpus/xprop_demux_2_2_wrapped.il
-    test/corpus/xprop_demux_2_2_wrapped_xprop.gold
     test/corpus/xprop_demux_2_2_wrapped_xprop.il
-    test/corpus/xprop_demux_3_1_uut.gold
     test/corpus/xprop_demux_3_1_uut.il
-    test/corpus/xprop_demux_3_1_wrapped.gold
     test/corpus/xprop_demux_3_1_wrapped.il
-    test/corpus/xprop_demux_3_1_wrapped_xprop.gold
     test/corpus/xprop_demux_3_1_wrapped_xprop.il
-    test/corpus/xprop_dff_1nd_uut.gold
     test/corpus/xprop_dff_1nd_uut.il
-    test/corpus/xprop_dff_1nd_wrapped.gold
     test/corpus/xprop_dff_1nd_wrapped.il
-    test/corpus/xprop_dff_1nd_wrapped_xprop.gold
     test/corpus/xprop_dff_1nd_wrapped_xprop.il
-    test/corpus/xprop_dff_1pd_uut.gold
     test/corpus/xprop_dff_1pd_uut.il
-    test/corpus/xprop_dff_1pd_wrapped.gold
     test/corpus/xprop_dff_1pd_wrapped.il
-    test/corpus/xprop_dff_1pd_wrapped_xprop.gold
     test/corpus/xprop_dff_1pd_wrapped_xprop.il
-    test/corpus/xprop_dff_3nd_uut.gold
     test/corpus/xprop_dff_3nd_uut.il
-    test/corpus/xprop_dff_3nd_wrapped.gold
     test/corpus/xprop_dff_3nd_wrapped.il
-    test/corpus/xprop_dff_3nd_wrapped_xprop.gold
     test/corpus/xprop_dff_3nd_wrapped_xprop.il
-    test/corpus/xprop_dff_3pd_uut.gold
     test/corpus/xprop_dff_3pd_uut.il
-    test/corpus/xprop_dff_3pd_wrapped.gold
     test/corpus/xprop_dff_3pd_wrapped.il
-    test/corpus/xprop_dff_3pd_wrapped_xprop.gold
     test/corpus/xprop_dff_3pd_wrapped_xprop.il
-    test/corpus/xprop_dffe_1nnd_uut.gold
     test/corpus/xprop_dffe_1nnd_uut.il
-    test/corpus/xprop_dffe_1nnd_wrapped.gold
     test/corpus/xprop_dffe_1nnd_wrapped.il
-    test/corpus/xprop_dffe_1nnd_wrapped_xprop.gold
     test/corpus/xprop_dffe_1nnd_wrapped_xprop.il
-    test/corpus/xprop_dffe_1npd_uut.gold
     test/corpus/xprop_dffe_1npd_uut.il
-    test/corpus/xprop_dffe_1npd_wrapped.gold
     test/corpus/xprop_dffe_1npd_wrapped.il
-    test/corpus/xprop_dffe_1npd_wrapped_xprop.gold
     test/corpus/xprop_dffe_1npd_wrapped_xprop.il
-    test/corpus/xprop_dffe_1pnd_uut.gold
     test/corpus/xprop_dffe_1pnd_uut.il
-    test/corpus/xprop_dffe_1pnd_wrapped.gold
     test/corpus/xprop_dffe_1pnd_wrapped.il
-    test/corpus/xprop_dffe_1pnd_wrapped_xprop.gold
     test/corpus/xprop_dffe_1pnd_wrapped_xprop.il
-    test/corpus/xprop_dffe_1ppd_uut.gold
     test/corpus/xprop_dffe_1ppd_uut.il
-    test/corpus/xprop_dffe_1ppd_wrapped.gold
     test/corpus/xprop_dffe_1ppd_wrapped.il
-    test/corpus/xprop_dffe_1ppd_wrapped_xprop.gold
     test/corpus/xprop_dffe_1ppd_wrapped_xprop.il
-    test/corpus/xprop_dffe_3nnd_uut.gold
     test/corpus/xprop_dffe_3nnd_uut.il
-    test/corpus/xprop_dffe_3nnd_wrapped.gold
     test/corpus/xprop_dffe_3nnd_wrapped.il
-    test/corpus/xprop_dffe_3nnd_wrapped_xprop.gold
     test/corpus/xprop_dffe_3nnd_wrapped_xprop.il
-    test/corpus/xprop_dffe_3npd_uut.gold
     test/corpus/xprop_dffe_3npd_uut.il
-    test/corpus/xprop_dffe_3npd_wrapped.gold
     test/corpus/xprop_dffe_3npd_wrapped.il
-    test/corpus/xprop_dffe_3npd_wrapped_xprop.gold
     test/corpus/xprop_dffe_3npd_wrapped_xprop.il
-    test/corpus/xprop_dffe_3pnd_uut.gold
     test/corpus/xprop_dffe_3pnd_uut.il
-    test/corpus/xprop_dffe_3pnd_wrapped.gold
     test/corpus/xprop_dffe_3pnd_wrapped.il
-    test/corpus/xprop_dffe_3pnd_wrapped_xprop.gold
     test/corpus/xprop_dffe_3pnd_wrapped_xprop.il
-    test/corpus/xprop_dffe_3ppd_uut.gold
     test/corpus/xprop_dffe_3ppd_uut.il
-    test/corpus/xprop_dffe_3ppd_wrapped.gold
     test/corpus/xprop_dffe_3ppd_wrapped.il
-    test/corpus/xprop_dffe_3ppd_wrapped_xprop.gold
     test/corpus/xprop_dffe_3ppd_wrapped_xprop.il
-    test/corpus/xprop_div_5s3_3_uut.gold
     test/corpus/xprop_div_5s3_3_uut.il
-    test/corpus/xprop_div_5s3_3_wrapped.gold
     test/corpus/xprop_div_5s3_3_wrapped.il
-    test/corpus/xprop_div_5s3_3_wrapped_xprop.gold
     test/corpus/xprop_div_5s3_3_wrapped_xprop.il
-    test/corpus/xprop_div_5u3_3_uut.gold
     test/corpus/xprop_div_5u3_3_uut.il
-    test/corpus/xprop_div_5u3_3_wrapped.gold
     test/corpus/xprop_div_5u3_3_wrapped.il
-    test/corpus/xprop_div_5u3_3_wrapped_xprop.gold
     test/corpus/xprop_div_5u3_3_wrapped_xprop.il
-    test/corpus/xprop_divfloor_5s3_3_uut.gold
     test/corpus/xprop_divfloor_5s3_3_uut.il
-    test/corpus/xprop_divfloor_5s3_3_wrapped.gold
     test/corpus/xprop_divfloor_5s3_3_wrapped.il
-    test/corpus/xprop_divfloor_5s3_3_wrapped_xprop.gold
     test/corpus/xprop_divfloor_5s3_3_wrapped_xprop.il
-    test/corpus/xprop_divfloor_5u3_3_uut.gold
     test/corpus/xprop_divfloor_5u3_3_uut.il
-    test/corpus/xprop_divfloor_5u3_3_wrapped.gold
     test/corpus/xprop_divfloor_5u3_3_wrapped.il
-    test/corpus/xprop_divfloor_5u3_3_wrapped_xprop.gold
     test/corpus/xprop_divfloor_5u3_3_wrapped_xprop.il
-    test/corpus/xprop_eq_5s3_2_uut.gold
     test/corpus/xprop_eq_5s3_2_uut.il
-    test/corpus/xprop_eq_5s3_2_wrapped.gold
     test/corpus/xprop_eq_5s3_2_wrapped.il
-    test/corpus/xprop_eq_5s3_2_wrapped_xprop.gold
     test/corpus/xprop_eq_5s3_2_wrapped_xprop.il
-    test/corpus/xprop_eq_5u3_2_uut.gold
     test/corpus/xprop_eq_5u3_2_uut.il
-    test/corpus/xprop_eq_5u3_2_wrapped.gold
     test/corpus/xprop_eq_5u3_2_wrapped.il
-    test/corpus/xprop_eq_5u3_2_wrapped_xprop.gold
     test/corpus/xprop_eq_5u3_2_wrapped_xprop.il
-    test/corpus/xprop_eqx_5s3_2_uut.gold
     test/corpus/xprop_eqx_5s3_2_uut.il
-    test/corpus/xprop_eqx_5s3_2_wrapped.gold
     test/corpus/xprop_eqx_5s3_2_wrapped.il
-    test/corpus/xprop_eqx_5s3_2_wrapped_xprop.gold
     test/corpus/xprop_eqx_5s3_2_wrapped_xprop.il
-    test/corpus/xprop_eqx_5u3_2_uut.gold
     test/corpus/xprop_eqx_5u3_2_uut.il
-    test/corpus/xprop_eqx_5u3_2_wrapped.gold
     test/corpus/xprop_eqx_5u3_2_wrapped.il
-    test/corpus/xprop_eqx_5u3_2_wrapped_xprop.gold
     test/corpus/xprop_eqx_5u3_2_wrapped_xprop.il
-    test/corpus/xprop_ff_1_uut.gold
     test/corpus/xprop_ff_1_uut.il
-    test/corpus/xprop_ff_1_wrapped.gold
     test/corpus/xprop_ff_1_wrapped.il
-    test/corpus/xprop_ff_1_wrapped_xprop.gold
     test/corpus/xprop_ff_1_wrapped_xprop.il
-    test/corpus/xprop_ff_3_uut.gold
     test/corpus/xprop_ff_3_uut.il
-    test/corpus/xprop_ff_3_wrapped.gold
     test/corpus/xprop_ff_3_wrapped.il
-    test/corpus/xprop_ff_3_wrapped_xprop.gold
     test/corpus/xprop_ff_3_wrapped_xprop.il
-    test/corpus/xprop_ge_5s3_2_uut.gold
     test/corpus/xprop_ge_5s3_2_uut.il
-    test/corpus/xprop_ge_5s3_2_wrapped.gold
     test/corpus/xprop_ge_5s3_2_wrapped.il
-    test/corpus/xprop_ge_5s3_2_wrapped_xprop.gold
     test/corpus/xprop_ge_5s3_2_wrapped_xprop.il
-    test/corpus/xprop_ge_5u3_2_uut.gold
     test/corpus/xprop_ge_5u3_2_uut.il
-    test/corpus/xprop_ge_5u3_2_wrapped.gold
     test/corpus/xprop_ge_5u3_2_wrapped.il
-    test/corpus/xprop_ge_5u3_2_wrapped_xprop.gold
     test/corpus/xprop_ge_5u3_2_wrapped_xprop.il
-    test/corpus/xprop_gt_5s3_2_uut.gold
     test/corpus/xprop_gt_5s3_2_uut.il
-    test/corpus/xprop_gt_5s3_2_wrapped.gold
     test/corpus/xprop_gt_5s3_2_wrapped.il
-    test/corpus/xprop_gt_5s3_2_wrapped_xprop.gold
     test/corpus/xprop_gt_5s3_2_wrapped_xprop.il
-    test/corpus/xprop_gt_5u3_2_uut.gold
     test/corpus/xprop_gt_5u3_2_uut.il
-    test/corpus/xprop_gt_5u3_2_wrapped.gold
     test/corpus/xprop_gt_5u3_2_wrapped.il
-    test/corpus/xprop_gt_5u3_2_wrapped_xprop.gold
     test/corpus/xprop_gt_5u3_2_wrapped_xprop.il
-    test/corpus/xprop_le_5s3_2_uut.gold
     test/corpus/xprop_le_5s3_2_uut.il
-    test/corpus/xprop_le_5s3_2_wrapped.gold
     test/corpus/xprop_le_5s3_2_wrapped.il
-    test/corpus/xprop_le_5s3_2_wrapped_xprop.gold
     test/corpus/xprop_le_5s3_2_wrapped_xprop.il
-    test/corpus/xprop_le_5u3_2_uut.gold
     test/corpus/xprop_le_5u3_2_uut.il
-    test/corpus/xprop_le_5u3_2_wrapped.gold
     test/corpus/xprop_le_5u3_2_wrapped.il
-    test/corpus/xprop_le_5u3_2_wrapped_xprop.gold
     test/corpus/xprop_le_5u3_2_wrapped_xprop.il
-    test/corpus/xprop_logic_and_1u1_1_uut.gold
     test/corpus/xprop_logic_and_1u1_1_uut.il
-    test/corpus/xprop_logic_and_1u1_1_wrapped.gold
     test/corpus/xprop_logic_and_1u1_1_wrapped.il
-    test/corpus/xprop_logic_and_1u1_1_wrapped_xprop.gold
     test/corpus/xprop_logic_and_1u1_1_wrapped_xprop.il
-    test/corpus/xprop_logic_and_3s3_1_uut.gold
     test/corpus/xprop_logic_and_3s3_1_uut.il
-    test/corpus/xprop_logic_and_3s3_1_wrapped.gold
     test/corpus/xprop_logic_and_3s3_1_wrapped.il
-    test/corpus/xprop_logic_and_3s3_1_wrapped_xprop.gold
     test/corpus/xprop_logic_and_3s3_1_wrapped_xprop.il
-    test/corpus/xprop_logic_and_3s3_3_uut.gold
     test/corpus/xprop_logic_and_3s3_3_uut.il
-    test/corpus/xprop_logic_and_3s3_3_wrapped.gold
     test/corpus/xprop_logic_and_3s3_3_wrapped.il
-    test/corpus/xprop_logic_and_3s3_3_wrapped_xprop.gold
     test/corpus/xprop_logic_and_3s3_3_wrapped_xprop.il
-    test/corpus/xprop_logic_and_3u3_3_uut.gold
     test/corpus/xprop_logic_and_3u3_3_uut.il
-    test/corpus/xprop_logic_and_3u3_3_wrapped.gold
     test/corpus/xprop_logic_and_3u3_3_wrapped.il
-    test/corpus/xprop_logic_and_3u3_3_wrapped_xprop.gold
     test/corpus/xprop_logic_and_3u3_3_wrapped_xprop.il
-    test/corpus/xprop_logic_not_1u_1_uut.gold
     test/corpus/xprop_logic_not_1u_1_uut.il
-    test/corpus/xprop_logic_not_1u_1_wrapped.gold
     test/corpus/xprop_logic_not_1u_1_wrapped.il
-    test/corpus/xprop_logic_not_1u_1_wrapped_xprop.gold
     test/corpus/xprop_logic_not_1u_1_wrapped_xprop.il
-    test/corpus/xprop_logic_not_3s_1_uut.gold
     test/corpus/xprop_logic_not_3s_1_uut.il
-    test/corpus/xprop_logic_not_3s_1_wrapped.gold
     test/corpus/xprop_logic_not_3s_1_wrapped.il
-    test/corpus/xprop_logic_not_3s_1_wrapped_xprop.gold
     test/corpus/xprop_logic_not_3s_1_wrapped_xprop.il
-    test/corpus/xprop_logic_not_3s_3_uut.gold
     test/corpus/xprop_logic_not_3s_3_uut.il
-    test/corpus/xprop_logic_not_3s_3_wrapped.gold
     test/corpus/xprop_logic_not_3s_3_wrapped.il
-    test/corpus/xprop_logic_not_3s_3_wrapped_xprop.gold
     test/corpus/xprop_logic_not_3s_3_wrapped_xprop.il
-    test/corpus/xprop_logic_not_3u_3_uut.gold
     test/corpus/xprop_logic_not_3u_3_uut.il
-    test/corpus/xprop_logic_not_3u_3_wrapped.gold
     test/corpus/xprop_logic_not_3u_3_wrapped.il
-    test/corpus/xprop_logic_not_3u_3_wrapped_xprop.gold
     test/corpus/xprop_logic_not_3u_3_wrapped_xprop.il
-    test/corpus/xprop_logic_or_1u1_1_uut.gold
     test/corpus/xprop_logic_or_1u1_1_uut.il
-    test/corpus/xprop_logic_or_1u1_1_wrapped.gold
     test/corpus/xprop_logic_or_1u1_1_wrapped.il
-    test/corpus/xprop_logic_or_1u1_1_wrapped_xprop.gold
     test/corpus/xprop_logic_or_1u1_1_wrapped_xprop.il
-    test/corpus/xprop_logic_or_3s3_1_uut.gold
     test/corpus/xprop_logic_or_3s3_1_uut.il
-    test/corpus/xprop_logic_or_3s3_1_wrapped.gold
     test/corpus/xprop_logic_or_3s3_1_wrapped.il
-    test/corpus/xprop_logic_or_3s3_1_wrapped_xprop.gold
     test/corpus/xprop_logic_or_3s3_1_wrapped_xprop.il
-    test/corpus/xprop_logic_or_3s3_3_uut.gold
     test/corpus/xprop_logic_or_3s3_3_uut.il
-    test/corpus/xprop_logic_or_3s3_3_wrapped.gold
     test/corpus/xprop_logic_or_3s3_3_wrapped.il
-    test/corpus/xprop_logic_or_3s3_3_wrapped_xprop.gold
     test/corpus/xprop_logic_or_3s3_3_wrapped_xprop.il
-    test/corpus/xprop_logic_or_3u3_3_uut.gold
     test/corpus/xprop_logic_or_3u3_3_uut.il
-    test/corpus/xprop_logic_or_3u3_3_wrapped.gold
     test/corpus/xprop_logic_or_3u3_3_wrapped.il
-    test/corpus/xprop_logic_or_3u3_3_wrapped_xprop.gold
     test/corpus/xprop_logic_or_3u3_3_wrapped_xprop.il
-    test/corpus/xprop_lt_5s3_2_uut.gold
     test/corpus/xprop_lt_5s3_2_uut.il
-    test/corpus/xprop_lt_5s3_2_wrapped.gold
     test/corpus/xprop_lt_5s3_2_wrapped.il
-    test/corpus/xprop_lt_5s3_2_wrapped_xprop.gold
     test/corpus/xprop_lt_5s3_2_wrapped_xprop.il
-    test/corpus/xprop_lt_5u3_2_uut.gold
     test/corpus/xprop_lt_5u3_2_uut.il
-    test/corpus/xprop_lt_5u3_2_wrapped.gold
     test/corpus/xprop_lt_5u3_2_wrapped.il
-    test/corpus/xprop_lt_5u3_2_wrapped_xprop.gold
     test/corpus/xprop_lt_5u3_2_wrapped_xprop.il
-    test/corpus/xprop_mod_5s3_3_uut.gold
     test/corpus/xprop_mod_5s3_3_uut.il
-    test/corpus/xprop_mod_5s3_3_wrapped.gold
     test/corpus/xprop_mod_5s3_3_wrapped.il
-    test/corpus/xprop_mod_5s3_3_wrapped_xprop.gold
     test/corpus/xprop_mod_5s3_3_wrapped_xprop.il
-    test/corpus/xprop_mod_5u3_3_uut.gold
     test/corpus/xprop_mod_5u3_3_uut.il
-    test/corpus/xprop_mod_5u3_3_wrapped.gold
     test/corpus/xprop_mod_5u3_3_wrapped.il
-    test/corpus/xprop_mod_5u3_3_wrapped_xprop.gold
     test/corpus/xprop_mod_5u3_3_wrapped_xprop.il
-    test/corpus/xprop_modfloor_5s3_3_uut.gold
     test/corpus/xprop_modfloor_5s3_3_uut.il
-    test/corpus/xprop_modfloor_5s3_3_wrapped.gold
     test/corpus/xprop_modfloor_5s3_3_wrapped.il
-    test/corpus/xprop_modfloor_5s3_3_wrapped_xprop.gold
     test/corpus/xprop_modfloor_5s3_3_wrapped_xprop.il
-    test/corpus/xprop_modfloor_5u3_3_uut.gold
     test/corpus/xprop_modfloor_5u3_3_uut.il
-    test/corpus/xprop_modfloor_5u3_3_wrapped.gold
     test/corpus/xprop_modfloor_5u3_3_wrapped.il
-    test/corpus/xprop_modfloor_5u3_3_wrapped_xprop.gold
     test/corpus/xprop_modfloor_5u3_3_wrapped_xprop.il
-    test/corpus/xprop_mul_5s3_3_uut.gold
     test/corpus/xprop_mul_5s3_3_uut.il
-    test/corpus/xprop_mul_5s3_3_wrapped.gold
     test/corpus/xprop_mul_5s3_3_wrapped.il
-    test/corpus/xprop_mul_5s3_3_wrapped_xprop.gold
     test/corpus/xprop_mul_5s3_3_wrapped_xprop.il
-    test/corpus/xprop_mul_5u3_3_uut.gold
     test/corpus/xprop_mul_5u3_3_uut.il
-    test/corpus/xprop_mul_5u3_3_wrapped.gold
     test/corpus/xprop_mul_5u3_3_wrapped.il
-    test/corpus/xprop_mul_5u3_3_wrapped_xprop.gold
     test/corpus/xprop_mul_5u3_3_wrapped_xprop.il
-    test/corpus/xprop_mux_1_uut.gold
     test/corpus/xprop_mux_1_uut.il
-    test/corpus/xprop_mux_1_wrapped.gold
     test/corpus/xprop_mux_1_wrapped.il
-    test/corpus/xprop_mux_1_wrapped_xprop.gold
     test/corpus/xprop_mux_1_wrapped_xprop.il
-    test/corpus/xprop_mux_3_uut.gold
     test/corpus/xprop_mux_3_uut.il
-    test/corpus/xprop_mux_3_wrapped.gold
     test/corpus/xprop_mux_3_wrapped.il
-    test/corpus/xprop_mux_3_wrapped_xprop.gold
     test/corpus/xprop_mux_3_wrapped_xprop.il
-    test/corpus/xprop_ne_5s3_2_uut.gold
     test/corpus/xprop_ne_5s3_2_uut.il
-    test/corpus/xprop_ne_5s3_2_wrapped.gold
     test/corpus/xprop_ne_5s3_2_wrapped.il
-    test/corpus/xprop_ne_5s3_2_wrapped_xprop.gold
     test/corpus/xprop_ne_5s3_2_wrapped_xprop.il
-    test/corpus/xprop_ne_5u3_2_uut.gold
     test/corpus/xprop_ne_5u3_2_uut.il
-    test/corpus/xprop_ne_5u3_2_wrapped.gold
     test/corpus/xprop_ne_5u3_2_wrapped.il
-    test/corpus/xprop_ne_5u3_2_wrapped_xprop.gold
     test/corpus/xprop_ne_5u3_2_wrapped_xprop.il
-    test/corpus/xprop_neg_3s_5_uut.gold
     test/corpus/xprop_neg_3s_5_uut.il
-    test/corpus/xprop_neg_3s_5_wrapped.gold
     test/corpus/xprop_neg_3s_5_wrapped.il
-    test/corpus/xprop_neg_3s_5_wrapped_xprop.gold
     test/corpus/xprop_neg_3s_5_wrapped_xprop.il
-    test/corpus/xprop_nex_5s3_2_uut.gold
     test/corpus/xprop_nex_5s3_2_uut.il
-    test/corpus/xprop_nex_5s3_2_wrapped.gold
     test/corpus/xprop_nex_5s3_2_wrapped.il
-    test/corpus/xprop_nex_5s3_2_wrapped_xprop.gold
     test/corpus/xprop_nex_5s3_2_wrapped_xprop.il
-    test/corpus/xprop_nex_5u3_2_uut.gold
     test/corpus/xprop_nex_5u3_2_uut.il
-    test/corpus/xprop_nex_5u3_2_wrapped.gold
     test/corpus/xprop_nex_5u3_2_wrapped.il
-    test/corpus/xprop_nex_5u3_2_wrapped_xprop.gold
     test/corpus/xprop_nex_5u3_2_wrapped_xprop.il
-    test/corpus/xprop_not_3s_5_uut.gold
     test/corpus/xprop_not_3s_5_uut.il
-    test/corpus/xprop_not_3s_5_wrapped.gold
     test/corpus/xprop_not_3s_5_wrapped.il
-    test/corpus/xprop_not_3s_5_wrapped_xprop.gold
     test/corpus/xprop_not_3s_5_wrapped_xprop.il
-    test/corpus/xprop_or_1s1_2_uut.gold
     test/corpus/xprop_or_1s1_2_uut.il
-    test/corpus/xprop_or_1s1_2_wrapped.gold
     test/corpus/xprop_or_1s1_2_wrapped.il
-    test/corpus/xprop_or_1s1_2_wrapped_xprop.gold
     test/corpus/xprop_or_1s1_2_wrapped_xprop.il
-    test/corpus/xprop_or_1u1_1_uut.gold
     test/corpus/xprop_or_1u1_1_uut.il
-    test/corpus/xprop_or_1u1_1_wrapped.gold
     test/corpus/xprop_or_1u1_1_wrapped.il
-    test/corpus/xprop_or_1u1_1_wrapped_xprop.gold
     test/corpus/xprop_or_1u1_1_wrapped_xprop.il
-    test/corpus/xprop_or_2u2_2_uut.gold
     test/corpus/xprop_or_2u2_2_uut.il
-    test/corpus/xprop_or_2u2_2_wrapped.gold
     test/corpus/xprop_or_2u2_2_wrapped.il
-    test/corpus/xprop_or_2u2_2_wrapped_xprop.gold
     test/corpus/xprop_or_2u2_2_wrapped_xprop.il
-    test/corpus/xprop_pmux_1_4_uut.gold
     test/corpus/xprop_pmux_1_4_uut.il
-    test/corpus/xprop_pmux_1_4_wrapped.gold
     test/corpus/xprop_pmux_1_4_wrapped.il
-    test/corpus/xprop_pmux_1_4_wrapped_xprop.gold
     test/corpus/xprop_pmux_1_4_wrapped_xprop.il
-    test/corpus/xprop_pmux_2_2_uut.gold
     test/corpus/xprop_pmux_2_2_uut.il
-    test/corpus/xprop_pmux_2_2_wrapped.gold
     test/corpus/xprop_pmux_2_2_wrapped.il
-    test/corpus/xprop_pmux_2_2_wrapped_xprop.gold
     test/corpus/xprop_pmux_2_2_wrapped_xprop.il
-    test/corpus/xprop_pmux_3_1_uut.gold
     test/corpus/xprop_pmux_3_1_uut.il
-    test/corpus/xprop_pmux_3_1_wrapped.gold
     test/corpus/xprop_pmux_3_1_wrapped.il
-    test/corpus/xprop_pmux_3_1_wrapped_xprop.gold
     test/corpus/xprop_pmux_3_1_wrapped_xprop.il
-    test/corpus/xprop_pmux_4_4_uut.gold
     test/corpus/xprop_pmux_4_4_uut.il
-    test/corpus/xprop_pmux_4_4_wrapped.gold
     test/corpus/xprop_pmux_4_4_wrapped.il
-    test/corpus/xprop_pmux_4_4_wrapped_xprop.gold
     test/corpus/xprop_pmux_4_4_wrapped_xprop.il
-    test/corpus/xprop_pos_3s_5_uut.gold
     test/corpus/xprop_pos_3s_5_uut.il
-    test/corpus/xprop_pos_3s_5_wrapped.gold
     test/corpus/xprop_pos_3s_5_wrapped.il
-    test/corpus/xprop_pos_3s_5_wrapped_xprop.gold
     test/corpus/xprop_pos_3s_5_wrapped_xprop.il
-    test/corpus/xprop_reduce_and_3s_3_uut.gold
     test/corpus/xprop_reduce_and_3s_3_uut.il
-    test/corpus/xprop_reduce_and_3s_3_wrapped.gold
     test/corpus/xprop_reduce_and_3s_3_wrapped.il
-    test/corpus/xprop_reduce_and_3s_3_wrapped_xprop.gold
     test/corpus/xprop_reduce_and_3s_3_wrapped_xprop.il
-    test/corpus/xprop_reduce_and_3u_3_uut.gold
     test/corpus/xprop_reduce_and_3u_3_uut.il
-    test/corpus/xprop_reduce_and_3u_3_wrapped.gold
     test/corpus/xprop_reduce_and_3u_3_wrapped.il
-    test/corpus/xprop_reduce_and_3u_3_wrapped_xprop.gold
     test/corpus/xprop_reduce_and_3u_3_wrapped_xprop.il
-    test/corpus/xprop_reduce_bool_1u_1_uut.gold
     test/corpus/xprop_reduce_bool_1u_1_uut.il
-    test/corpus/xprop_reduce_bool_1u_1_wrapped.gold
     test/corpus/xprop_reduce_bool_1u_1_wrapped.il
-    test/corpus/xprop_reduce_bool_1u_1_wrapped_xprop.gold
     test/corpus/xprop_reduce_bool_1u_1_wrapped_xprop.il
-    test/corpus/xprop_reduce_bool_3s_1_uut.gold
     test/corpus/xprop_reduce_bool_3s_1_uut.il
-    test/corpus/xprop_reduce_bool_3s_1_wrapped.gold
     test/corpus/xprop_reduce_bool_3s_1_wrapped.il
-    test/corpus/xprop_reduce_bool_3s_1_wrapped_xprop.gold
     test/corpus/xprop_reduce_bool_3s_1_wrapped_xprop.il
-    test/corpus/xprop_reduce_bool_3s_3_uut.gold
     test/corpus/xprop_reduce_bool_3s_3_uut.il
-    test/corpus/xprop_reduce_bool_3s_3_wrapped.gold
     test/corpus/xprop_reduce_bool_3s_3_wrapped.il
-    test/corpus/xprop_reduce_bool_3s_3_wrapped_xprop.gold
     test/corpus/xprop_reduce_bool_3s_3_wrapped_xprop.il
-    test/corpus/xprop_reduce_bool_3u_3_uut.gold
     test/corpus/xprop_reduce_bool_3u_3_uut.il
-    test/corpus/xprop_reduce_bool_3u_3_wrapped.gold
     test/corpus/xprop_reduce_bool_3u_3_wrapped.il
-    test/corpus/xprop_reduce_bool_3u_3_wrapped_xprop.gold
     test/corpus/xprop_reduce_bool_3u_3_wrapped_xprop.il
-    test/corpus/xprop_reduce_or_3s_3_uut.gold
     test/corpus/xprop_reduce_or_3s_3_uut.il
-    test/corpus/xprop_reduce_or_3s_3_wrapped.gold
     test/corpus/xprop_reduce_or_3s_3_wrapped.il
-    test/corpus/xprop_reduce_or_3s_3_wrapped_xprop.gold
     test/corpus/xprop_reduce_or_3s_3_wrapped_xprop.il
-    test/corpus/xprop_reduce_or_3u_3_uut.gold
     test/corpus/xprop_reduce_or_3u_3_uut.il
-    test/corpus/xprop_reduce_or_3u_3_wrapped.gold
     test/corpus/xprop_reduce_or_3u_3_wrapped.il
-    test/corpus/xprop_reduce_or_3u_3_wrapped_xprop.gold
     test/corpus/xprop_reduce_or_3u_3_wrapped_xprop.il
-    test/corpus/xprop_reduce_xnor_3s_3_uut.gold
     test/corpus/xprop_reduce_xnor_3s_3_uut.il
-    test/corpus/xprop_reduce_xnor_3s_3_wrapped.gold
     test/corpus/xprop_reduce_xnor_3s_3_wrapped.il
-    test/corpus/xprop_reduce_xnor_3s_3_wrapped_xprop.gold
     test/corpus/xprop_reduce_xnor_3s_3_wrapped_xprop.il
-    test/corpus/xprop_reduce_xnor_3u_3_uut.gold
     test/corpus/xprop_reduce_xnor_3u_3_uut.il
-    test/corpus/xprop_reduce_xnor_3u_3_wrapped.gold
     test/corpus/xprop_reduce_xnor_3u_3_wrapped.il
-    test/corpus/xprop_reduce_xnor_3u_3_wrapped_xprop.gold
     test/corpus/xprop_reduce_xnor_3u_3_wrapped_xprop.il
-    test/corpus/xprop_reduce_xor_3s_3_uut.gold
     test/corpus/xprop_reduce_xor_3s_3_uut.il
-    test/corpus/xprop_reduce_xor_3s_3_wrapped.gold
     test/corpus/xprop_reduce_xor_3s_3_wrapped.il
-    test/corpus/xprop_reduce_xor_3s_3_wrapped_xprop.gold
     test/corpus/xprop_reduce_xor_3s_3_wrapped_xprop.il
-    test/corpus/xprop_reduce_xor_3u_3_uut.gold
     test/corpus/xprop_reduce_xor_3u_3_uut.il
-    test/corpus/xprop_reduce_xor_3u_3_wrapped.gold
     test/corpus/xprop_reduce_xor_3u_3_wrapped.il
-    test/corpus/xprop_reduce_xor_3u_3_wrapped_xprop.gold
     test/corpus/xprop_reduce_xor_3u_3_wrapped_xprop.il
-    test/corpus/xprop_shift_4s2s_8_uut.gold
     test/corpus/xprop_shift_4s2s_8_uut.il
-    test/corpus/xprop_shift_4s2s_8_wrapped.gold
     test/corpus/xprop_shift_4s2s_8_wrapped.il
-    test/corpus/xprop_shift_4s2s_8_wrapped_xprop.gold
     test/corpus/xprop_shift_4s2s_8_wrapped_xprop.il
-    test/corpus/xprop_shift_4s3s_3_uut.gold
     test/corpus/xprop_shift_4s3s_3_uut.il
-    test/corpus/xprop_shift_4s3s_3_wrapped.gold
     test/corpus/xprop_shift_4s3s_3_wrapped.il
-    test/corpus/xprop_shift_4s3s_3_wrapped_xprop.gold
     test/corpus/xprop_shift_4s3s_3_wrapped_xprop.il
-    test/corpus/xprop_shift_4s3u_3_uut.gold
     test/corpus/xprop_shift_4s3u_3_uut.il
-    test/corpus/xprop_shift_4s3u_3_wrapped.gold
     test/corpus/xprop_shift_4s3u_3_wrapped.il
-    test/corpus/xprop_shift_4s3u_3_wrapped_xprop.gold
     test/corpus/xprop_shift_4s3u_3_wrapped_xprop.il
-    test/corpus/xprop_shift_4u2s_8_uut.gold
     test/corpus/xprop_shift_4u2s_8_uut.il
-    test/corpus/xprop_shift_4u2s_8_wrapped.gold
     test/corpus/xprop_shift_4u2s_8_wrapped.il
-    test/corpus/xprop_shift_4u2s_8_wrapped_xprop.gold
     test/corpus/xprop_shift_4u2s_8_wrapped_xprop.il
-    test/corpus/xprop_shift_4u3s_3_uut.gold
     test/corpus/xprop_shift_4u3s_3_uut.il
-    test/corpus/xprop_shift_4u3s_3_wrapped.gold
     test/corpus/xprop_shift_4u3s_3_wrapped.il
-    test/corpus/xprop_shift_4u3s_3_wrapped_xprop.gold
     test/corpus/xprop_shift_4u3s_3_wrapped_xprop.il
-    test/corpus/xprop_shift_4u3u_3_uut.gold
     test/corpus/xprop_shift_4u3u_3_uut.il
-    test/corpus/xprop_shift_4u3u_3_wrapped.gold
     test/corpus/xprop_shift_4u3u_3_wrapped.il
-    test/corpus/xprop_shift_4u3u_3_wrapped_xprop.gold
     test/corpus/xprop_shift_4u3u_3_wrapped_xprop.il
-    test/corpus/xprop_shiftx_4u2s_8_uut.gold
     test/corpus/xprop_shiftx_4u2s_8_uut.il
-    test/corpus/xprop_shiftx_4u2s_8_wrapped.gold
     test/corpus/xprop_shiftx_4u2s_8_wrapped.il
-    test/corpus/xprop_shiftx_4u2s_8_wrapped_xprop.gold
     test/corpus/xprop_shiftx_4u2s_8_wrapped_xprop.il
-    test/corpus/xprop_shiftx_4u3s_3_uut.gold
     test/corpus/xprop_shiftx_4u3s_3_uut.il
-    test/corpus/xprop_shiftx_4u3s_3_wrapped.gold
     test/corpus/xprop_shiftx_4u3s_3_wrapped.il
-    test/corpus/xprop_shiftx_4u3s_3_wrapped_xprop.gold
     test/corpus/xprop_shiftx_4u3s_3_wrapped_xprop.il
-    test/corpus/xprop_shl_4s3u_3_uut.gold
     test/corpus/xprop_shl_4s3u_3_uut.il
-    test/corpus/xprop_shl_4s3u_3_wrapped.gold
     test/corpus/xprop_shl_4s3u_3_wrapped.il
-    test/corpus/xprop_shl_4s3u_3_wrapped_xprop.gold
     test/corpus/xprop_shl_4s3u_3_wrapped_xprop.il
-    test/corpus/xprop_shl_4u3u_3_uut.gold
     test/corpus/xprop_shl_4u3u_3_uut.il
-    test/corpus/xprop_shl_4u3u_3_wrapped.gold
     test/corpus/xprop_shl_4u3u_3_wrapped.il
-    test/corpus/xprop_shl_4u3u_3_wrapped_xprop.gold
     test/corpus/xprop_shl_4u3u_3_wrapped_xprop.il
-    test/corpus/xprop_shr_4s3u_3_uut.gold
     test/corpus/xprop_shr_4s3u_3_uut.il
-    test/corpus/xprop_shr_4s3u_3_wrapped.gold
     test/corpus/xprop_shr_4s3u_3_wrapped.il
-    test/corpus/xprop_shr_4s3u_3_wrapped_xprop.gold
     test/corpus/xprop_shr_4s3u_3_wrapped_xprop.il
-    test/corpus/xprop_shr_4u3u_3_uut.gold
     test/corpus/xprop_shr_4u3u_3_uut.il
-    test/corpus/xprop_shr_4u3u_3_wrapped.gold
     test/corpus/xprop_shr_4u3u_3_wrapped.il
-    test/corpus/xprop_shr_4u3u_3_wrapped_xprop.gold
     test/corpus/xprop_shr_4u3u_3_wrapped_xprop.il
-    test/corpus/xprop_sshl_4s3u_3_uut.gold
     test/corpus/xprop_sshl_4s3u_3_uut.il
-    test/corpus/xprop_sshl_4s3u_3_wrapped.gold
     test/corpus/xprop_sshl_4s3u_3_wrapped.il
-    test/corpus/xprop_sshl_4s3u_3_wrapped_xprop.gold
     test/corpus/xprop_sshl_4s3u_3_wrapped_xprop.il
-    test/corpus/xprop_sshl_4u3u_3_uut.gold
     test/corpus/xprop_sshl_4u3u_3_uut.il
-    test/corpus/xprop_sshl_4u3u_3_wrapped.gold
     test/corpus/xprop_sshl_4u3u_3_wrapped.il
-    test/corpus/xprop_sshl_4u3u_3_wrapped_xprop.gold
     test/corpus/xprop_sshl_4u3u_3_wrapped_xprop.il
-    test/corpus/xprop_sshr_4s3u_3_uut.gold
     test/corpus/xprop_sshr_4s3u_3_uut.il
-    test/corpus/xprop_sshr_4s3u_3_wrapped.gold
     test/corpus/xprop_sshr_4s3u_3_wrapped.il
-    test/corpus/xprop_sshr_4s3u_3_wrapped_xprop.gold
     test/corpus/xprop_sshr_4s3u_3_wrapped_xprop.il
-    test/corpus/xprop_sshr_4u3u_3_uut.gold
     test/corpus/xprop_sshr_4u3u_3_uut.il
-    test/corpus/xprop_sshr_4u3u_3_wrapped.gold
     test/corpus/xprop_sshr_4u3u_3_wrapped.il
-    test/corpus/xprop_sshr_4u3u_3_wrapped_xprop.gold
     test/corpus/xprop_sshr_4u3u_3_wrapped_xprop.il
-    test/corpus/xprop_sub_5s3_3_uut.gold
     test/corpus/xprop_sub_5s3_3_uut.il
-    test/corpus/xprop_sub_5s3_3_wrapped.gold
     test/corpus/xprop_sub_5s3_3_wrapped.il
-    test/corpus/xprop_sub_5s3_3_wrapped_xprop.gold
     test/corpus/xprop_sub_5s3_3_wrapped_xprop.il
-    test/corpus/xprop_sub_5u3_3_uut.gold
     test/corpus/xprop_sub_5u3_3_uut.il
-    test/corpus/xprop_sub_5u3_3_wrapped.gold
     test/corpus/xprop_sub_5u3_3_wrapped.il
-    test/corpus/xprop_sub_5u3_3_wrapped_xprop.gold
     test/corpus/xprop_sub_5u3_3_wrapped_xprop.il
-    test/corpus/xprop_xnor_1s1_2_uut.gold
     test/corpus/xprop_xnor_1s1_2_uut.il
-    test/corpus/xprop_xnor_1s1_2_wrapped.gold
     test/corpus/xprop_xnor_1s1_2_wrapped.il
-    test/corpus/xprop_xnor_1s1_2_wrapped_xprop.gold
     test/corpus/xprop_xnor_1s1_2_wrapped_xprop.il
-    test/corpus/xprop_xnor_1u1_1_uut.gold
     test/corpus/xprop_xnor_1u1_1_uut.il
-    test/corpus/xprop_xnor_1u1_1_wrapped.gold
     test/corpus/xprop_xnor_1u1_1_wrapped.il
-    test/corpus/xprop_xnor_1u1_1_wrapped_xprop.gold
     test/corpus/xprop_xnor_1u1_1_wrapped_xprop.il
-    test/corpus/xprop_xnor_2u2_2_uut.gold
     test/corpus/xprop_xnor_2u2_2_uut.il
-    test/corpus/xprop_xnor_2u2_2_wrapped.gold
     test/corpus/xprop_xnor_2u2_2_wrapped.il
-    test/corpus/xprop_xnor_2u2_2_wrapped_xprop.gold
     test/corpus/xprop_xnor_2u2_2_wrapped_xprop.il
-    test/corpus/xprop_xor_1s1_2_uut.gold
     test/corpus/xprop_xor_1s1_2_uut.il
-    test/corpus/xprop_xor_1s1_2_wrapped.gold
     test/corpus/xprop_xor_1s1_2_wrapped.il
-    test/corpus/xprop_xor_1s1_2_wrapped_xprop.gold
     test/corpus/xprop_xor_1s1_2_wrapped_xprop.il
-    test/corpus/xprop_xor_1u1_1_uut.gold
     test/corpus/xprop_xor_1u1_1_uut.il
-    test/corpus/xprop_xor_1u1_1_wrapped.gold
     test/corpus/xprop_xor_1u1_1_wrapped.il
-    test/corpus/xprop_xor_1u1_1_wrapped_xprop.gold
     test/corpus/xprop_xor_1u1_1_wrapped_xprop.il
-    test/corpus/xprop_xor_2u2_2_uut.gold
     test/corpus/xprop_xor_2u2_2_uut.il
-    test/corpus/xprop_xor_2u2_2_wrapped.gold
     test/corpus/xprop_xor_2u2_2_wrapped.il
-    test/corpus/xprop_xor_2u2_2_wrapped_xprop.gold
     test/corpus/xprop_xor_2u2_2_wrapped_xprop.il
 
 source-repository head
