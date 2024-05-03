@@ -68,7 +68,7 @@ cell = tok "cell" *> (IL.Cell <$> ident <*> (ident <* eol) <*> stmts cellBody)
       <?> "cell"
 
 proc :: Parser IL.ModBlock
-proc = tok "process" *> (IL.Proc <$> (ident <* eol) <*> stmts assign <*> maybe (block switch) <*> stmts assign <*> stmts sync)
+proc = tok "process" *> (IL.Proc <$> (ident <* eol) <*> stmts assign <*> maybe (block switch) <*> stmts assign <*> stmts' sync)
       <?> "process"
 
 assign :: Parser IL.Assign
@@ -81,9 +81,9 @@ switch = tok "switch" *> (IL.Switch <$> (sigSpec <* eol) <*> attrStmts kase)
 
 sync :: Parser IL.Sync
 sync = tok "sync" *>
-      (   tok "global" *> (IL.SyncGlobal <$> stmts update)
-      <|> tok "init"   *> (IL.SyncInit <$> stmts update)
-      <|> tok "always" *> (IL.SyncAlways <$> stmts update)
+      (   tok "global" *> eol *> (IL.SyncGlobal <$> stmts update)
+      <|> tok "init"   *> eol *> (IL.SyncInit <$> stmts update)
+      <|> tok "always" *> eol *> (IL.SyncAlways <$> stmts update)
       <|>                  IL.SyncSignal <$> syncType <*> sigSpec <*> stmts update
       )
 
@@ -150,8 +150,16 @@ sigConcat = tok "{" *> (IL.SigConcat <$> many sigSpec) <* tok "}"
 stmts :: Parser a -> Parser [IL.Stmt a]
 stmts = many . stmt
 
+-- | No eol.
+stmts' :: Parser a -> Parser [IL.Stmt a]
+stmts' = many . stmt'
+
 stmt :: Parser a -> Parser (IL.Stmt a)
 stmt p = IL.Stmt <$> comments <*> p <* eol
+
+-- | No eol.
+stmt' :: Parser a -> Parser (IL.Stmt a)
+stmt' p = IL.Stmt <$> comments <*> p
 
 attrStmts :: Parser a -> Parser [IL.AttrStmt a]
 attrStmts = many . attrStmt
@@ -188,8 +196,21 @@ constant = constantString
       <?> "constant"
 
 constantString :: Parser IL.Constant
-constantString = P.char '"' *> (IL.ConstantString <$> P.takeTill (=='"')) <* P.char '"' <* skipSpace -- TODO escape codes
+constantString = P.char '"' *> (IL.ConstantString <$> stringContents) <* P.char '"' <* skipSpace
         <?> "constant: string"
+
+stringContents :: Parser Text
+stringContents = (<>) <$> (mconcat <$> many escaped) <*> P.takeWhile (/='"')
+
+escaped :: Parser Text
+escaped = (<>) <$> P.takeWhile (\ c -> c /= '\\' && c /= '"') <*> escapeCode
+
+escapeCode :: Parser Text -- TODO: more?
+escapeCode = P.string "\\\""
+         <|> P.string "\\\\"
+         <|> P.string "\\0"
+         <|> P.string "\\n"
+         <|> P.string "\\t"
 
 constantValue :: Parser IL.Constant
 constantValue = IL.ConstantValue <$> decimal <*> (tok "'" *> binary)

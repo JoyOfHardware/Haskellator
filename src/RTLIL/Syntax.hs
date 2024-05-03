@@ -191,11 +191,11 @@ data Sync = SyncSignal SyncType SigSpec [Stmt Update]
       deriving (Show, Eq, Ord, Generic, Data, Typeable)
 
 instance Pretty Sync where
-      pretty = \ case
-            SyncSignal t s ups -> vsep $ (text "sync" <+> pretty t <+> pretty s) : map pretty ups
-            SyncGlobal ups     -> vsep $ text "sync global" : map pretty ups
-            SyncInit ups       -> vsep $ text "sync init" : map pretty ups
-            SyncAlways ups     -> vsep $ text "sync always" : map pretty ups
+      pretty = nest 2 . vsep . \ case
+            SyncSignal t s ups -> (text "sync" <+> pretty t <+> pretty s) : map pretty ups
+            SyncGlobal ups     -> text "sync global" : map pretty ups
+            SyncInit ups       -> text "sync init" : map pretty ups
+            SyncAlways ups     -> text "sync always" : map pretty ups
 
 data SyncType = Low
               | PosEdge
@@ -247,6 +247,7 @@ instance Pretty SigSpec where
             SigWire x              -> pretty x
             SigSelect s x Nothing  -> pretty s <+> brackets (pretty x)
             SigSelect s x (Just y) -> pretty s <+> brackets (pretty x <> colon <> pretty y)
+            SigConcat []           -> text "{}"
             SigConcat ss           -> braces $ hsep $ [mempty] <> map pretty ss <> [mempty]
 
 --- Utility

@@ -19,10 +19,11 @@ extra-source-files:
     README.md
     CHANGELOG.md
 data-files:
+    test/corpus/issue948.il
     test/corpus/opt_lut_elim.il
     test/corpus/opt_lut_port.il
-    test/corpus/opt_lut_port.out
-    test/corpus/wires.txt
+    test/corpus/rtlil_z_bits.il
+    test/corpus/test_escapes.json.il
     test/corpus/xprop_add_5s3_3_uut.il
     test/corpus/xprop_add_5s3_3_wrapped.il
     test/corpus/xprop_add_5s3_3_wrapped_xprop.il
