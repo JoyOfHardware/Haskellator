@@ -1,4 +1,4 @@
-import qualified RTLIL
+import qualified Haskellator
 
 import Data.List (isSuffixOf)
 import System.Directory (listDirectory, setCurrentDirectory)
@@ -17,7 +17,7 @@ getTests = do
             getTest c = let gold = c
                             out  = c -<.> "out"
                   in goldenVsFileDiff (takeBaseName c) diff gold out
-                   $ setCurrentDirectory (takeDirectory c) >> RTLIL.run [RTLIL.FlagO out, RTLIL.FlagP] [takeFileName c]
+                   $ setCurrentDirectory (takeDirectory c) >> Haskellator.run [Haskellator.FlagO out, Haskellator.FlagP] [takeFileName c]
 
             diff :: FilePath -> FilePath -> [String]
             diff ref new = ["diff", "-Bu", ref, new]

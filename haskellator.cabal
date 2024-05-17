@@ -376,8 +376,9 @@ source-repository head
 
 library
   exposed-modules:
-      RTLIL
-      RTLIL.Flags
+      Haskellator
+      Haskellator.Flags
+      MiniRTLIL.Syntax
       RTLIL.Parse
       RTLIL.Syntax
   other-modules:

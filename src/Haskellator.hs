@@ -1,10 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE Safe #-}
-module RTLIL
-    ( main, run, module RTLIL.Flags
+module Haskellator
+    ( main, run, module Haskellator.Flags
     ) where
 
-import RTLIL.Flags (Flag (..))
+import Haskellator.Flags (Flag (..))
 import RTLIL.Parse (parseFile)
 
 import Control.Monad (when, forM_)

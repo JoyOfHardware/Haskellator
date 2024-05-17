@@ -1,6 +1,6 @@
 module Main (main) where
 
-import qualified RTLIL
+import qualified Haskellator
 
 main :: IO ()
-main = RTLIL.main
+main = Haskellator.main

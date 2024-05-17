@@ -1,5 +1,5 @@
 {-# LANGUAGE Safe #-}
-module RTLIL.Flags (Flag (..)) where
+module Haskellator.Flags (Flag (..)) where
 
 data Flag = FlagV
           | FlagH
