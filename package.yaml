@@ -32,6 +32,7 @@ dependencies:
 - text
 - prettyprinter
 - attoparsec
+- pretty-show >= 1.10 && < 1.11
 
 ghc-options:
 - -Wall

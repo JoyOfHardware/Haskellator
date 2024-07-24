@@ -394,6 +394,7 @@ library
       attoparsec
     , base >=4.7 && <5
     , filepath
+    , pretty-show ==1.10.*
     , prettyprinter
     , text
   default-language: Haskell2010
@@ -414,6 +415,7 @@ executable rtlil-parse
     , base >=4.7 && <5
     , filepath
     , haskellator
+    , pretty-show ==1.10.*
     , prettyprinter
     , text
   default-language: Haskell2010
@@ -436,6 +438,7 @@ test-suite haskellator-test
     , directory
     , filepath
     , haskellator
+    , pretty-show ==1.10.*
     , prettyprinter
     , tasty
     , tasty-golden

@@ -15,6 +15,7 @@ import System.Environment (getArgs)
 import System.Exit (exitFailure)
 import System.FilePath ((-<.>))
 import System.IO (stderr)
+import Text.Show.Pretty (ppShow)
 
 import qualified Data.Text                 as T
 import qualified Data.Text.IO              as T
@@ -58,14 +59,14 @@ run flags args = forM_ args $ \ f -> do
 
       when verbose $ do
             pInfo $ "AST: "
-            pInfo $ T.pack $ show result
+            pInfo $ T.pack $ ppShow result
 
       when verbose $ do
             pInfo $ "Pretty: "
             pInfo $ prettyPrint result
 
       when verbose $ pInfo $ "Writing to file: " <> T.pack fout
-      liftIO $ T.writeFile fout $ if writePretty then prettyPrint result else T.pack $ show result
+      liftIO $ T.writeFile fout $ if writePretty then prettyPrint result else T.pack $ ppShow result
 
       where getOutFile :: MonadIO m => String -> m String
             getOutFile filename = case filter flagO flags of
