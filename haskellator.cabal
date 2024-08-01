@@ -19,6 +19,7 @@ extra-source-files:
     README.md
     CHANGELOG.md
 data-files:
+    test/corpus/comments.il
     test/corpus/issue948.il
     test/corpus/opt_lut_elim.il
     test/corpus/opt_lut_port.il

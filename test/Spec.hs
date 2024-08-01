@@ -20,7 +20,7 @@ getTests = do
                    $ setCurrentDirectory (takeDirectory c) >> Haskellator.run [Haskellator.FlagO out, Haskellator.FlagP] [takeFileName c]
 
             diff :: FilePath -> FilePath -> [String]
-            diff ref new = ["diff", "-Bu", ref, new]
+            diff ref new = ["diff", "-bBu", ref, new]
 
 main :: IO ()
 main = getTests >>= defaultMain

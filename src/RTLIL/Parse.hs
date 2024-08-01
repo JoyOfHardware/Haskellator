@@ -27,7 +27,7 @@ parseFile f = liftIO (handleResult <$> (P.parse (rtlilFile) <$> T.readFile f))
                   P.Done _ r       -> pure r
 
 rtlilFile :: Parser IL.File
-rtlilFile = IL.File <$> comments <*> maybe (stmt autoIdx) <*> blocks mod
+rtlilFile = IL.File <$> comments <*> maybe (stmt autoIdx) <*> blocks mod <*> comments
       <?> "RTLIL file"
 
 autoIdx :: Parser IL.AutoIdx
@@ -171,7 +171,7 @@ blocks :: Parser a -> Parser [IL.Block a]
 blocks = many . block
 
 block :: Parser a -> Parser (IL.Block a)
-block p = IL.Block <$> stmts attr <*> comments <*> p <* tok "end" <* eol
+block p = IL.Block <$> stmts attr <*> comments <*> p <*> comments <* tok "end" <* eol
 
 comments :: Parser [IL.Comment]
 comments = many comment
