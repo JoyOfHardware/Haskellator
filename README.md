@@ -4,7 +4,9 @@ Humble beginnings of what will likely become a tracing (supporting sparse simula
 [RTLIL](https://github.com/YosysHQ/yosys/blob/main/kernel/rtlil.h) simulator integrated with an SMT
 solver for retro-actively resolving trigger/change conditions for a given signal.
 
-## Usage
+# Usage
+
+# Run With Stack
 
 Currently the main executable is the frontend to the RTLIL parser, called
 `rtlil-parse`. Its only purpose is to test the parser.
@@ -23,6 +25,8 @@ Usage: rtlil-parse [OPTION...] <filename>
   -p           --pretty   Write pretty-printed output instead of AST (for testing).
   -o file.out             Output file name.
 ```
+
+# Build With Stack
 
 Alternatively, to build, install, and run the `rtlil-parse` executable, use:
 ```
@@ -47,4 +51,14 @@ original RTLIL and the test passes if they are the same (up to differences in
 whitespace).  To run the test suite, use:
 ```
 $ stack test
+```
+
+# Run and Build With Nix(Linux and MacOS)
+
+The following will allow you to see a pretty printed
+ast for the given input `il` file.
+
+```bash
+nix-shell
+rtlil-parse test/corpus/xprop_dffe_1nnd_wrapped_xprop.il -o parsed1.ast
 ```
