@@ -6,6 +6,16 @@ solver for retro-actively resolving trigger/change conditions for a given signal
 
 # Usage
 
+# Run and Build With Nix(Linux and MacOS)
+
+The following will allow you to see a pretty printed
+ast for the given input `il` file.
+
+```bash
+nix-shell
+rtlil-parse test/corpus/xprop_dffe_1nnd_wrapped_xprop.il -o parsed1.ast
+```
+
 # Run With Stack
 
 Currently the main executable is the frontend to the RTLIL parser, called
@@ -51,14 +61,4 @@ original RTLIL and the test passes if they are the same (up to differences in
 whitespace).  To run the test suite, use:
 ```
 $ stack test
-```
-
-# Run and Build With Nix(Linux and MacOS)
-
-The following will allow you to see a pretty printed
-ast for the given input `il` file.
-
-```bash
-nix-shell
-rtlil-parse test/corpus/xprop_dffe_1nnd_wrapped_xprop.il -o parsed1.ast
 ```
