@@ -76,7 +76,7 @@ assign = tok "assign" *> (IL.Assign <$> sigSpec <*> sigSpec)
       <?> "assign"
 
 switch :: Parser IL.Switch
-switch = tok "switch" *> (IL.Switch <$> (sigSpec <* eol) <*> attrStmts kase)
+switch = tok "switch" *> (IL.Switch <$> (sigSpec <* eol) <*> attrStmts' kase)
       <?> "switch"
 
 sync :: Parser IL.Sync
@@ -98,7 +98,7 @@ update = tok "update" *> (IL.Update <$> sigSpec <*> sigSpec)
       <?> "update"
 
 kase :: Parser IL.Case
-kase = tok "case" *> (IL.Case <$> (sigSpec `P.sepBy` tok ",") <*> many kaseBody)
+kase = tok "case" *> (IL.Case <$> (sigSpec `P.sepBy` tok ",") <*> (eol *> many kaseBody))
       <?> "case"
 
 kaseBody :: Parser IL.CaseBody
@@ -161,11 +161,16 @@ stmt p = IL.Stmt <$> comments <*> p <* eol
 stmt' :: Parser a -> Parser (IL.Stmt a)
 stmt' p = IL.Stmt <$> comments <*> p
 
-attrStmts :: Parser a -> Parser [IL.AttrStmt a]
-attrStmts = many . attrStmt
+-- | No eol.
+attrStmts' :: Parser a -> Parser [IL.AttrStmt a]
+attrStmts' = many . attrStmt'
 
 attrStmt :: Parser a -> Parser (IL.AttrStmt a)
 attrStmt p = IL.AttrStmt <$> stmts attr <*> comments <*> p <* eol
+
+-- | No eol.
+attrStmt' :: Parser a -> Parser (IL.AttrStmt a)
+attrStmt' p = IL.AttrStmt <$> stmts attr <*> comments <*> p
 
 blocks :: Parser a -> Parser [IL.Block a]
 blocks = many . block

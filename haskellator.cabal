@@ -371,6 +371,7 @@ data-files:
     test/corpus/yosys/xprop_xor_2u2_2_wrapped_xprop.il
     test/corpus/regression/comments.il
     test/corpus/regression/process1.il
+    test/corpus/regression/process1.out
 
 source-repository head
   type: git
