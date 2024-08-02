@@ -50,11 +50,14 @@ data Stmt a = Stmt [Comment] a
 instance Pretty a => Pretty (Stmt a) where
       pretty (Stmt cs x) = vsep $ ppComs cs <> [pretty x]
 
-data Block a = Block [Stmt Attr] [Comment] a
+-- | A block wraps a group of statements (optionally preceded by attributes)
+--   ending with an "end". Comments might appear immediately before the body of
+--   the block or immediately before the "end".
+data Block a = Block [Stmt Attr] [Comment] a [Comment]
       deriving (Show, Eq, Ord, Generic, Data, Typeable)
 
 instance Pretty a => Pretty (Block a) where
-      pretty (Block as cs x) = vsep $ map pretty as <> ppComs cs <> [nest 2 $ pretty x, text "end"]
+      pretty (Block as csInit x csEnd) = vsep $ map pretty as <> ppComs csInit <> [nest 2 $ pretty x] <> ppComs csEnd <> [text "end"]
 
 data Attr = Attr Ident Constant
       deriving (Show, Eq, Ord, Generic, Data, Typeable)
@@ -62,11 +65,11 @@ data Attr = Attr Ident Constant
 instance Pretty Attr where
       pretty (Attr x c) = text "attribute" <+> pretty x <+> pretty c
 
-data File = File [Comment] (Maybe (Stmt AutoIdx)) [Block Module]
+data File = File [Comment] (Maybe (Stmt AutoIdx)) [Block Module] [Comment]
       deriving (Show, Eq, Ord, Generic, Data, Typeable)
 
 instance Pretty File where
-      pretty (File cs idx body) = vsep $ ppComs cs <> ppAutoIdx idx <> map pretty body <> [mempty]
+      pretty (File csInit idx body csEnd) = vsep $ ppComs csInit <> ppAutoIdx idx <> map pretty body <> [mempty] <> ppComs csEnd
 
 data Module = Module Ident [ModBody]
       deriving (Show, Eq, Ord, Generic, Data, Typeable)

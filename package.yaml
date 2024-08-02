@@ -10,7 +10,8 @@ extra-source-files:
 - README.md
 - CHANGELOG.md
 data-files:
-- test/corpus/*
+- test/corpus/yosys/*
+- test/corpus/regression/*
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
