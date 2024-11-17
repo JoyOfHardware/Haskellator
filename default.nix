@@ -12,7 +12,7 @@ let
     haskellPackages.prettyprinter
   ];
 in
-pkgs.haskellPackages.mkDerivation {
+haskellPackages.mkDerivation {
   pname = "haskellator";
   version = "0.1.0.0";
   src = ./.;
