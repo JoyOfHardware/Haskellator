@@ -20,7 +20,7 @@ haskellPackages.mkDerivation {
   isExecutable = true;
   enableSeparateDataOutput = true;
   libraryHaskellDepends = haskellDeps;
-  executableHaskellDepends = haskellPackages.base;
+  executableHaskellDepends = [haskellPackages.base];
   homepage = "https://github.com/JoyOfHardware/haskellator#readme";
   license = pkgs.lib.licenses.gpl3Only;
   mainProgram = "rtlil-parse";
