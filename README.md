@@ -46,3 +46,6 @@ AST for the given input `il` file.
 $ nix-shell
 $ rtlil-parse test/corpus/xprop_dffe_1nnd_wrapped_xprop.il -o parsed1.ast
 ```
+
+# TODO
+ - [ ] automated CICD on gitea on personal servers
