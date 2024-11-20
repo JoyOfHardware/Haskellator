@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.36.0.
+-- This file has been generated from package.yaml by hpack version 0.37.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -12,7 +12,7 @@ bug-reports:    https://github.com/JoyOfHardware/haskellator/issues
 author:         JoyOfHardware
 maintainer:     joyofhardware@github.com
 copyright:      2024 JoyOfHardware
-license:        none
+license:        MIT
 license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
@@ -372,6 +372,8 @@ data-files:
     test/corpus/regression/comments.il
     test/corpus/regression/process1.il
     test/corpus/regression/process1.out
+    test/corpus/regression/process2.il
+    test/corpus/regression/process2.out
 
 source-repository head
   type: git

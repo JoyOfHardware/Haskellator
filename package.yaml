@@ -1,7 +1,7 @@
 name:                haskellator
 version:             0.1.0.0
 github:              "JoyOfHardware/haskellator"
-license:             none
+license:             MIT
 author:              "JoyOfHardware"
 maintainer:          "joyofhardware@github.com"
 copyright:           "2024 JoyOfHardware"
