@@ -55,7 +55,9 @@ common warnings
     ghc-options: -Wall
 
 library
-  exposed-modules:     Haskellator
+  exposed-modules:
+    Haskellator,
+    RtlilAstTypes
   other-modules:       
   hs-source-dirs:      src
   build-depends:       

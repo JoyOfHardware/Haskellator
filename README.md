@@ -49,3 +49,20 @@ $ rtlil-parse test/corpus/xprop_dffe_1nnd_wrapped_xprop.il -o parsed1.ast
 
 # TODO
  - [ ] automated CICD on gitea on personal servers
+ - [ ] update to have support for four state logic by converting 'X' and 'Z' to zero
+
+# Limitations
+ - Does not support propagating non-two state logic, that is, no
+   support for X or Z values. Default behavior is to reject such
+   input although future iterations may support initializing X and
+   Z to 0.
+ - All cycles in circuit graphs must have at one D Flip-Flop on the
+   cycle path. This requirement necesarily pre-cludes simulation of
+   circuits such as NAND level-resolution SRAMs. The main reason for
+   this restriction is to avoid having to handle metastability in 
+   simulation.
+
+   I have yet to evaluate the implications of how this affects
+   multi-clock domain circuits and their associated primitives such
+   as asynchronous FIFOs, but I plan to make sure simulation of such
+   circuits is possible and correct.

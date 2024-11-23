@@ -4,7 +4,7 @@ import System.Environment (getArgs)
 import System.IO
 import Control.Exception (catch, IOException)
 
-import qualified Haskellator
+import Haskellator
 
 main :: IO ()
 main = do
@@ -19,6 +19,7 @@ main = do
             putStrLn "File Contents:"
             putStrLn contents
         [] -> putStrLn "cabal run Haskellator -- <file-path>"
+    putStrLn $ show Haskellator.val
 
 -- Handle potential file reading errors
 handleReadError :: IOException -> IO String
