@@ -1,4 +1,4 @@
-module RtlilAstTypes(
+module RTLILParser.AST(
     PublicId(..),
     AutogenId(..),
     AutoIdxStmt(..),

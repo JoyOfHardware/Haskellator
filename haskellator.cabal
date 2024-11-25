@@ -57,9 +57,14 @@ common warnings
 library
   exposed-modules:
     Haskellator,
-    RtlilAstTypes
-  other-modules:       
-  hs-source-dirs:      src
+    -- RtlilAstTypes
+  other-modules:
+    RTLILParser.AST,
+    RTLILParser.Primitives,
+    RTLILParser.Parser,
+    Util
+  hs-source-dirs:
+    src,
   build-depends:       
     base ^>=4.17.2.1,
     parsec >=3.1
