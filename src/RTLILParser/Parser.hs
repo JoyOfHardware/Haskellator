@@ -1,5 +1,5 @@
 -- this parser largely references:
--- https://github.com/YosysHQ/yosys/blob/111b747d2797238eadf541879848492a9d34909a/docs/source/yosys_internals/formats/rtlil_text.rst
+-- https://yosyshq.readthedocs.io/projects/yosys/en/stable/appendix/rtlil_text.html
 module RTLILParser.Parser(a, val) where
 
 
@@ -7,11 +7,11 @@ import Control.Monad (void)
 import Text.Parsec
 import Text.Parsec.String (Parser)
 import RTLILParser.AST(
-    AutoIdxStmt(..),    ParamStmt(..), AutogenId(..),
-    Constant(..),       CellStmt(..),  PublicId(..),
-    AttrStmt(..),       Value(..),     Id(..),
-    CellId(..),         CellType(..), WireId(..),
-    SigSpec(..)
+    AutoIdxStmt(..),    ParamStmt(..),  AutogenId(..),
+    Constant(..),       CellStmt(..),   PublicId(..),
+    AttrStmt(..),       Value(..),      Id(..),
+    CellId(..),         CellType(..),   WireId(..),
+    SigSpec(..),        Slice(..)
     )
 import Util(binaryStringToInt)
 import RTLILParser.Primitives(pEscapedChar)
@@ -19,6 +19,9 @@ import RTLILParser.Primitives(pEscapedChar)
 -- https://github.com/YosysHQ/yosys/blob/111b747d2797238eadf541879848492a9d34909a/frontends/rtlil/rtlil_lexer.l#L88C1-L88C17
 nonws :: Parser Char
 nonws = noneOf " \t\r\n"
+
+pMaybeWs :: Parser String
+pMaybeWs = many (oneOf " \t")
 
 pWs :: Parser String
 pWs = many1 (oneOf " \t")
@@ -105,12 +108,53 @@ pCellStmt = do
     _ <- pEol
     return $ CellStmt cellId cellType
 
+-- Parse a single slice
+pSlice :: Parser Slice
+pSlice =
+    Slice
+    <$> (char '[' *> pMaybeWs *> pInteger <* pMaybeWs)
+    <*> (optionMaybe (char ':' *> pInteger) <* pMaybeWs <* char ']')
 
--- pModuleStmt :: Parser ()
--- pModuleStmt = 
+pSigSpecConcat :: Parser SigSpec
+pSigSpecConcat = do
+    _           <- char '{' <* pWs
+    sigspecs    <- pSigSpec `sepBy` pWs
+    _           <- pWs <* char '}'
+    return $ SigSpecConcat sigspecs
+
+applySlices :: SigSpec -> Parser SigSpec
+applySlices base = do
+    maybeSlice <- optionMaybe pSlice
+    case maybeSlice of
+        Nothing -> return base
+        Just slice -> applySlices (SigSpecSlice base slice)
+
+pSingleSigSpec :: Parser SigSpec
+pSingleSigSpec = do
+    baseSigSpec <- (SigSpecConstant <$> pConstant) 
+                   <|>
+                   (SigSpecWireId   <$> pWireId)
+    applySlices baseSigSpec
+
+pSigSpec :: Parser SigSpec
+pSigSpec = 
+    try pSigSpecConcat -- Check for concatenation first
+    <|> pSingleSigSpec -- Otherwise parse a single sigspec
+
+
+-- would correspond to `123456789[0:9][0:8]`
+exampleSigSpecSlice = 
+    SigSpecSlice 
+        (
+            SigSpecSlice 
+            (SigSpecConstant (ConstantInteger 123456789)) 
+                (Slice 0 $ Just 9)
+        )
+            (Slice 0 $ Just 8)
 
 -- val = parse pInteger "pInteger" "721"
-val = parse pModuleStmt "pModuleStmt" "module \\top\n"
+-- val = parse pModuleStmt "pModuleStmt" "module \\top\n"
+val = parse pSigSpec "pSigSpecSlice" "123456789[0:9][0:8]"
 
 a :: Int
 a = 3

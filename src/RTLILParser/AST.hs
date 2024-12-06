@@ -1,9 +1,9 @@
 module RTLILParser.AST(
-    AutoIdxStmt(..),    ParamStmt(..), AutogenId(..),
-    Constant(..),       CellStmt(..),  PublicId(..),
-    AttrStmt(..),       Value(..),     Id(..),
-    CellId(..),         CellType(..), WireId(..),
-    SigSpec(..)
+    AutoIdxStmt(..),    ParamStmt(..),  AutogenId(..),
+    Constant(..),       CellStmt(..),   PublicId(..),
+    AttrStmt(..),       Value(..),      Id(..),
+    CellId(..),         CellType(..),   WireId(..),
+    SigSpec(..),        Slice(..)
     ) where
 import Text.Read (Lexeme(Ident))
 import Data.Functor.Contravariant (Contravariant)
@@ -11,6 +11,7 @@ import GHC.RTS.Flags (DoCostCentres(CostCentresAll))
 
 data PublicId       = PublicId      String  deriving (Show)
 data AutogenId      = AutogenId     String  deriving (Show)
+data Slice          = Slice         Int (Maybe Int) deriving (Show)
 data Id             = Public    PublicId
                     | Autogen   AutogenId
                     deriving (Show)
@@ -23,7 +24,7 @@ data CellId         = CellId    Id deriving (Show)
 data CellType       = CellType  Id deriving (Show)
 data SigSpec        = SigSpecConstant   Constant
                     | SigSpecWireId     WireId
-                    | SigSpecSlice      SigSpec Int (Maybe Int)
+                    | SigSpecSlice      SigSpec Slice
                     | SigSpecConcat     [SigSpec]
                     deriving (Show)
 data Value = Value

@@ -46,7 +46,7 @@ AST for the given input `il` file.
 
 ```bash
 $ nix-shell
-$ rtlil-parse test/corpus/xprop_dffe_1nnd_wrapped_xprop.il -o parsed1.ast
+$ rtlil-parse
 ```
 
 # TODO
