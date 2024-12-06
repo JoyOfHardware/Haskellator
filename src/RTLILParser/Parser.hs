@@ -7,13 +7,13 @@ import Control.Monad (void)
 import Text.Parsec
 import Text.Parsec.String (Parser)
 import RTLILParser.AST(
-    PublicId(..), 
-    Id(..),
-    AutogenId(..),
-    AutoIdxStmt(..),
-    Value(..)
+    AutoIdxStmt(..),    ParamStmt(..), AutogenId(..),
+    Constant(..),       CellStmt(..),  PublicId(..),
+    AttrStmt(..),       Value(..),     Id(..),
+    CellId(..),         CellType(..), WireId(..),
+    SigSpec(..)
     )
-import Util(binaryStringToInt) 
+import Util(binaryStringToInt)
 import RTLILParser.Primitives(pEscapedChar)
 
 -- https://github.com/YosysHQ/yosys/blob/111b747d2797238eadf541879848492a9d34909a/frontends/rtlil/rtlil_lexer.l#L88C1-L88C17
@@ -36,6 +36,9 @@ pId :: Parser Id
 pId = Public  <$> pPublicId
   <|> Autogen <$> pAutogenId
 
+pWireId :: Parser WireId
+pWireId = WireId <$> pId
+
 decimalDigit :: Parser Char
 decimalDigit = oneOf "0123456789"
 
@@ -45,7 +48,7 @@ pBinaryDigit :: Parser Char
 pBinaryDigit = oneOf "01"
 
 pString :: Parser String
-pString = 
+pString =
     between delimiter delimiter parseString
     where
         delimiter = char '"'
@@ -53,7 +56,7 @@ pString =
 
 
 pValue :: Parser Value
-pValue = Value  <$> pInteger 
+pValue = Value  <$> pInteger
                 <*> (binaryStringToInt <$> many1 pBinaryDigit)
 
 pInteger :: Parser Int
@@ -65,6 +68,11 @@ pInteger = do
         Just _  -> -value
         Nothing ->  value
 
+pConstant :: Parser Constant
+pConstant =
+    try (ConstantValue <$> pValue)
+    <|> (ConstantInteger <$> pInteger)
+    <|> (ConstantString <$> pString)
 
 pAutoIdxStmt :: Parser AutoIdxStmt
 pAutoIdxStmt = AutoIdxStmt <$> (string "autoidx" *> pWs *> pInteger <* pEol)
@@ -74,6 +82,29 @@ pModuleStmt = string "module" *> pWs *> pId <* pEol
 
 pModuleEndStmt :: Parser ()
 pModuleEndStmt = void (string "end")
+
+pParamStmt :: Parser ParamStmt
+pParamStmt = ParamStmt
+    <$> (string "parameter" *> pWs *> pId)
+    <*> optionMaybe (pWs *> pConstant)
+    <*  pEol
+
+pAttrStmt :: Parser AttrStmt
+pAttrStmt = AttrStmt
+    <$> (string "attribute" *> pWs *> pId)
+    <*> (pWs *> pConstant)
+    <*  pEol
+
+pCellStmt :: Parser CellStmt
+pCellStmt = do
+    _ <- string "cell"
+    _ <- pWs
+    cellId <- CellId <$> pId
+    _ <- pWs
+    cellType <- CellType <$> pId
+    _ <- pEol
+    return $ CellStmt cellId cellType
+
 
 -- pModuleStmt :: Parser ()
 -- pModuleStmt = 

@@ -35,6 +35,8 @@ We are currently working on expanding the RTLIL that can be parsed to include
 [RTLIL](https://github.com/YosysHQ/yosys/blob/main/kernel/rtlil.h) 
 emitted from Amaranth Lang.
 
+Currently targetting RTLIL in Yosys .47.
+
 # Usage
 
 ## Run and Build With Nix(Linux and MacOS)
@@ -50,6 +52,9 @@ $ rtlil-parse test/corpus/xprop_dffe_1nnd_wrapped_xprop.il -o parsed1.ast
 # TODO
  - [ ] automated CICD on gitea on personal servers
  - [ ] update to have support for four state logic by converting 'X' and 'Z' to zero
+ - [ ] validation pass that checks that `ConstantInteger Int` is
+   32 bits, that is, within range  \[-2147483648, 2147483648)
+ - [ ] Reverse/repair cell-stmt
 
 # Limitations
  - Does not support propagating non-two state logic, that is, no
