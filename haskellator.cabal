@@ -86,6 +86,7 @@ executable rtlil-parse
     -- Other library packages from which modules are imported.
     build-depends:    
         base ^>=4.17.2.1,
+        pretty-show >=1.6,
         haskellator
 
     -- Directories containing source files.

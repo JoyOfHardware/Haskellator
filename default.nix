@@ -10,6 +10,7 @@ let
     haskellPackages.filepath
     haskellPackages.pretty-show
     haskellPackages.prettyprinter
+    haskellPackages.pretty-show
   ];
 in
 haskellPackages.mkDerivation {

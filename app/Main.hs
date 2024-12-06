@@ -3,6 +3,7 @@ module Main where
 import System.Environment (getArgs)
 import System.IO
 import Control.Exception (catch, IOException)
+import Text.Show.Pretty (ppShow)
 
 import Haskellator
 
@@ -19,7 +20,7 @@ main = do
             putStrLn "File Contents:"
             putStrLn contents
         [] -> putStrLn "cabal run Haskellator -- <file-path>"
-    putStrLn $ show Haskellator.val
+    putStrLn $ ppShow Haskellator.val
 
 -- Handle potential file reading errors
 handleReadError :: IOException -> IO String
