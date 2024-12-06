@@ -63,25 +63,6 @@ pInteger = do
         Nothing ->  value
 
 -- strings
--- comments
--- file
--- Autoindex statements
--- Module
--- Attribute statements
--- Signal Specifications
--- Connections
--- Wires
--- Memories
--- Cells
--- Processes
--- Switches
--- Syncs
-
-pWireId :: Parser WireId
-pWireId = WireId <$> pId
-
-
-
 pString :: Parser String
 pString =
     between delimiter delimiter parseString
@@ -89,20 +70,16 @@ pString =
         delimiter = char '"'
         parseString = many (pEscapedChar <|> noneOf "\\\"")
 
-pConstant :: Parser Constant
-pConstant =
-    try (ConstantValue <$> pValue)
-    <|> (ConstantInteger <$> pInteger)
-    <|> (ConstantString <$> pString)
+-- comments
+-- file
 
+-- Autoindex statements
 pAutoIdxStmt :: Parser AutoIdxStmt
 pAutoIdxStmt = AutoIdxStmt <$> (string "autoidx" *> pWs *> pInteger <* pEol)
 
+-- Module
 pModuleStmt :: Parser Id
 pModuleStmt = string "module" *> pWs *> pId <* pEol
-
-pModuleEndStmt :: Parser ()
-pModuleEndStmt = void (string "end")
 
 pParamStmt :: Parser ParamStmt
 pParamStmt = ParamStmt
@@ -110,28 +87,31 @@ pParamStmt = ParamStmt
     <*> optionMaybe (pWs *> pConstant)
     <*  pEol
 
+pConstant :: Parser Constant
+pConstant =
+    try (ConstantValue <$> pValue)
+    <|> (ConstantInteger <$> pInteger)
+    <|> (ConstantString <$> pString)
+
+pModuleEndStmt :: Parser ()
+pModuleEndStmt = void (string "end")
+
+-- Attribute statements
 pAttrStmt :: Parser AttrStmt
 pAttrStmt = AttrStmt
     <$> (string "attribute" *> pWs *> pId)
     <*> (pWs *> pConstant)
     <*  pEol
 
-pCellStmt :: Parser CellStmt
-pCellStmt = do
-    _ <- string "cell"
-    _ <- pWs
-    cellId <- CellId <$> pId
-    _ <- pWs
-    cellType <- CellType <$> pId
-    _ <- pEol
-    return $ CellStmt cellId cellType
-
--- Parse a single slice
-pSlice :: Parser Slice
-pSlice =
-    Slice
-    <$> (char '[' *> pMaybeWs *> pInteger <* pMaybeWs)
-    <*> (optionMaybe (char ':' *> pInteger) <* pMaybeWs <* char ']')
+-- Signal Specifications
+pSigSpec :: Parser SigSpec
+pSigSpec = do
+    baseSigSpec <- (SigSpecConstant <$> pConstant)
+                   <|>
+                   (SigSpecWireId   <$> pWireId)
+                   <|>
+                   pSigSpecConcat
+    applySlices baseSigSpec
 
 pSigSpecConcat :: Parser SigSpec
 pSigSpecConcat = do
@@ -147,86 +127,96 @@ applySlices base = do
         Nothing -> return base
         Just slice -> applySlices (SigSpecSlice base slice)
 
-pSingleSigSpec :: Parser SigSpec
-pSingleSigSpec = do
-    baseSigSpec <- (SigSpecConstant <$> pConstant) 
-                   <|>
-                   (SigSpecWireId   <$> pWireId)
-    applySlices baseSigSpec
+pSlice :: Parser Slice
+pSlice =
+    Slice
+    <$> (char '[' *> pMaybeWs *> pInteger <* pMaybeWs)
+    <*> (optionMaybe (char ':' *> pInteger) <* pMaybeWs <* char ']')
 
-pSigSpec :: Parser SigSpec
-pSigSpec = 
-    try pSigSpecConcat -- Check for concatenation first
-    <|> pSingleSigSpec -- Otherwise parse a single sigspec
-
+-- Connections
 pConnStmt :: Parser ConnStmt
 pConnStmt = ConnStmt
     <$> (string "connect" *> pWs *> pSigSpec)
     <*> (pWs *> pSigSpec)
     <*  pEol
 
-pWireOption :: Parser WireOption
-pWireOption =
-    try (WireOptionWidth  <$> (string "width"  *> pWs *> pInteger)) <|> 
-    try (WireOptionOffset <$> (string "offset" *> pWs *> pInteger)) <|> 
-    try (WireOptionInput  <$> (string "input"  *> pWs *> pInteger)) <|> 
-    try (WireOptionOutput <$> (string "output" *> pWs *> pInteger)) <|> 
-    try (WireOptionInout  <$> (string "inout"  *> pWs *> pInteger)) <|> 
-    (string "upto"      *> return WireOptionUpto)                   <|> 
-    (string "signed"    *> return WireOptionSigned)
-
-pWireStmt :: Parser WireStmt
-pWireStmt = 
-    WireStmt
-    <$  string "wire" 
-    <*  pWs
-    <*> (WireId <$> pId)
-    <*  pWs
-    <*> many pWireOption
-    <*  pEol
-
+-- Wires
 pWire :: Parser Wire
 pWire = do
     attrs <- many pAttrStmt
     wireStmt <- pWireStmt
     return $ Wire wireStmt attrs
 
-pMemoryOption :: Parser MemoryOption
-pMemoryOption = 
-    try (MemoryOptionWidth  <$> (string "width"  *> pWs *> pInteger)) <|> 
-    try (MemoryOptionSize   <$> (string "size"   *> pWs *> pInteger)) <|> 
-    try (MemoryOptionOffset <$> (string "offset" *> pWs *> pInteger))
-
-pMemoryStmt :: Parser MemoryStmt
-pMemoryStmt = 
-    MemoryStmt
-    <$  string "memory" 
+pWireStmt :: Parser WireStmt
+pWireStmt =
+    WireStmt
+    <$  string "wire"
     <*  pWs
-    <*> (MemoryID <$> pId)
+    <*> (WireId <$> pId)
     <*  pWs
-    <*> many pMemoryOption
+    <*> many pWireOption
     <*  pEol
 
+pWireId :: Parser WireId
+pWireId = WireId <$> pId
+
+pWireOption :: Parser WireOption
+pWireOption =
+    try (WireOptionWidth  <$> (string "width"  *> pWs *> pInteger)) <|>
+    try (WireOptionOffset <$> (string "offset" *> pWs *> pInteger)) <|>
+    try (WireOptionInput  <$> (string "input"  *> pWs *> pInteger)) <|>
+    try (WireOptionOutput <$> (string "output" *> pWs *> pInteger)) <|>
+    try (WireOptionInout  <$> (string "inout"  *> pWs *> pInteger)) <|>
+    (string "upto"      *> return WireOptionUpto)                   <|>
+    (string "signed"    *> return WireOptionSigned)
+
+-- Memories
 pMemory :: Parser Memory
 pMemory = do
     attrs <- many pAttrStmt
     memoryStmt <- pMemoryStmt
     return $ Memory memoryStmt attrs
 
--- <cell>              ::= <attr-stmt>* <cell-stmt> <cell-body-stmt>* <cell-end-stmt>
--- <cell-stmt>         ::= cell <cell-type> <cell-id> <eol>
--- <cell-id>           ::= <id>
--- <cell-type>         ::= <id>
--- <cell-body-stmt>    ::= parameter (signed | real)? <id> <constant> <eol>
---                      |  connect <id> <sigspec> <eol>
--- <cell-end-stmt>     ::= end <eol>
+pMemoryStmt :: Parser MemoryStmt
+pMemoryStmt =
+    MemoryStmt
+    <$  string "memory"
+    <*  pWs
+    <*> (MemoryID <$> pId)
+    <*  pWs
+    <*> many pMemoryOption
+    <*  pEol
+
+pMemoryOption :: Parser MemoryOption
+pMemoryOption =
+    try (MemoryOptionWidth  <$> (string "width"  *> pWs *> pInteger)) <|>
+    try (MemoryOptionSize   <$> (string "size"   *> pWs *> pInteger)) <|>
+    try (MemoryOptionOffset <$> (string "offset" *> pWs *> pInteger))
+
+-- Cells
+pCellStmt :: Parser CellStmt
+pCellStmt = do
+    _ <- string "cell"
+    _ <- pWs
+    cellId <- CellId <$> pId
+    _ <- pWs
+    cellType <- CellType <$> pId
+    _ <- pEol
+    return $ CellStmt cellId cellType
+
+-- Processes
+-- Switches
+-- Syncs
+
+
+
 
 -- would correspond to `123456789[0:9][0:8]`
-exampleSigSpecSlice = 
-    SigSpecSlice 
+exampleSigSpecSlice =
+    SigSpecSlice
         (
-            SigSpecSlice 
-            (SigSpecConstant (ConstantInteger 123456789)) 
+            SigSpecSlice
+            (SigSpecConstant (ConstantInteger 123456789))
                 (Slice 0 $ Just 9)
         )
             (Slice 0 $ Just 8)
