@@ -20,9 +20,9 @@
  - [x] <wire-stmt> ::= “wire” <wire-option>* <wire-id> <eol>
  - [x] <wire-id> ::= <id>
  - [x] <wire-option> ::= “width” <integer> | “offset” <integer> | “input” <integer> | “output” <integer> | “inout” <integer> | “upto” | “signed”
- - [ ] <memory> ::= <attr-stmt>* <memory-stmt>
- - [ ] <memory-stmt> ::= “memory” <memory-option>* <id> <eol>
- - [ ] <memory-option> ::= “width” <integer> | “size” <integer> | “offset” <integer>
+ - [x] <memory> ::= <attr-stmt>* <memory-stmt>
+ - [x] <memory-stmt> ::= “memory” <memory-option>* <id> <eol>
+ - [x] <memory-option> ::= “width” <integer> | “size” <integer> | “offset” <integer>
  - [ ] <cell> ::= <attr-stmt>* <cell-stmt> <cell-body-stmt>* <cell-end-stmt>
  - [ ] <cell-stmt> ::= "cell" <cell-id> <cell-type> <eol>
  - [x] <cell-id> ::= <id>

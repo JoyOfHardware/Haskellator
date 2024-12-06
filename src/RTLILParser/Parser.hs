@@ -1,7 +1,4 @@
--- this parser largely references:
--- https://yosyshq.readthedocs.io/projects/yosys/en/stable/appendix/rtlil_text.html
 module RTLILParser.Parser(a, val) where
-
 
 import Control.Monad (void)
 import Text.Parsec
@@ -17,41 +14,73 @@ import RTLILParser.AST(
    ,MemoryID(..)
     )
 import Util(binaryStringToInt)
-import RTLILParser.Primitives(pEscapedChar)
+import RTLILParser.Primitives(
+    pWs
+   ,pNonWs
+   ,pMaybeWs
+   ,pEol
+   ,pOctal
+   ,pEscapedChar
+    )
 
--- https://github.com/YosysHQ/yosys/blob/111b747d2797238eadf541879848492a9d34909a/frontends/rtlil/rtlil_lexer.l#L88C1-L88C17
-nonws :: Parser Char
-nonws = noneOf " \t\r\n"
+-- taken from: https://yosyshq.readthedocs.io/projects/yosys/en/0.47/appendix/rtlil_text.html
+-- parsers below are split int sections from the above link
 
-pMaybeWs :: Parser String
-pMaybeWs = many (oneOf " \t")
-
-pWs :: Parser String
-pWs = many1 (oneOf " \t")
-
-pEol :: Parser String
-pEol = many1 (oneOf "\r\n")
-
-pPublicId   :: Parser PublicId
-pPublicId   = PublicId <$> (char '\\' *> many1 nonws)
-
-pAutogenId  :: Parser AutogenId
-pAutogenId  = AutogenId <$> (char '$' *> many1 nonws)
-
+-- identifiers
 pId :: Parser Id
 pId = Public  <$> pPublicId
   <|> Autogen <$> pAutogenId
 
-pWireId :: Parser WireId
-pWireId = WireId <$> pId
+pPublicId   :: Parser PublicId
+pPublicId   = PublicId <$> (char '\\' *> many1 pNonWs)
 
-decimalDigit :: Parser Char
-decimalDigit = oneOf "0123456789"
+pAutogenId  :: Parser AutogenId
+pAutogenId  = AutogenId <$> (char '$' *> many1 pNonWs)
+
+-- values
+pValue :: Parser Value
+pValue = do
+    width <- many1 pDecimalDigit
+    _ <- char '\''
+    value <- many pBinaryDigit
+    return $ Value (read width) (binaryStringToInt value)
+
+pDecimalDigit :: Parser Char
+pDecimalDigit = oneOf "0123456789"
 
 -- update in the future to support 4 state logic
 -- by converting x and z to 0 and warning about it.
 pBinaryDigit :: Parser Char
 pBinaryDigit = oneOf "01"
+
+pInteger :: Parser Int
+pInteger = do
+    sign <- optionMaybe (char '-')
+    digits <- many1 pDecimalDigit
+    let value = read digits
+    return $ case sign of
+        Just _  -> -value
+        Nothing ->  value
+
+-- strings
+-- comments
+-- file
+-- Autoindex statements
+-- Module
+-- Attribute statements
+-- Signal Specifications
+-- Connections
+-- Wires
+-- Memories
+-- Cells
+-- Processes
+-- Switches
+-- Syncs
+
+pWireId :: Parser WireId
+pWireId = WireId <$> pId
+
+
 
 pString :: Parser String
 pString =
@@ -59,20 +88,6 @@ pString =
     where
         delimiter = char '"'
         parseString = many (pEscapedChar <|> noneOf "\\\"")
-
-
-pValue :: Parser Value
-pValue = Value  <$> pInteger
-                <*> (binaryStringToInt <$> many1 pBinaryDigit)
-
-pInteger :: Parser Int
-pInteger = do
-    sign <- optionMaybe (char '-')
-    digits <- many1 digit
-    let value = read digits
-    return $ case sign of
-        Just _  -> -value
-        Nothing ->  value
 
 pConstant :: Parser Constant
 pConstant =
@@ -197,6 +212,14 @@ pMemory = do
     attrs <- many pAttrStmt
     memoryStmt <- pMemoryStmt
     return $ Memory memoryStmt attrs
+
+-- <cell>              ::= <attr-stmt>* <cell-stmt> <cell-body-stmt>* <cell-end-stmt>
+-- <cell-stmt>         ::= cell <cell-type> <cell-id> <eol>
+-- <cell-id>           ::= <id>
+-- <cell-type>         ::= <id>
+-- <cell-body-stmt>    ::= parameter (signed | real)? <id> <constant> <eol>
+--                      |  connect <id> <sigspec> <eol>
+-- <cell-end-stmt>     ::= end <eol>
 
 -- would correspond to `123456789[0:9][0:8]`
 exampleSigSpecSlice = 
