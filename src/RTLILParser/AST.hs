@@ -1,14 +1,43 @@
-module RTLILParser.AST(
-    AutoIdxStmt(..)    ,ParamStmt(..)       ,AutogenId(..)
-   ,Constant(..)       ,CellStmt(..)        ,PublicId(..)
-   ,AttrStmt(..)       ,Value(..)           ,Id(..)
-   ,CellId(..)         ,CellType(..)        ,WireId(..)
-   ,SigSpec(..)        ,Slice(..)           ,ConnStmt(..)
-   ,WireOption(..)     ,WireStmt(..)        ,Wire(..)
-   ,MemoryOption(..)   ,MemoryStmt(..)      ,Memory(..)
-   ,MemoryID(..)       ,CellBodyStmt(..)    ,ParameterSign(..)
-   ,Cell(..)
-    ) where
+module RTLILParser.AST (
+    -- Identifiers
+    Id(..), PublicId(..), AutogenId(..),
+
+    -- Values
+    Value(..),
+
+    -- Autoindex statements
+    AutoIdxStmt(..),
+
+    -- Module
+    ParamStmt(..), Constant(..),
+
+    -- Attribute statements
+    AttrStmt(..),
+
+    -- Signal Specifications
+    SigSpec(..), Slice(..),
+
+    -- Connections
+    ConnStmt(..),
+
+    -- Wires
+    Wire(..), WireStmt(..), WireId(..), WireOption(..),
+
+    -- Memories
+    Memory(..), MemoryStmt(..), MemoryID(..), MemoryOption(..),
+
+    -- Cells
+    Cell(..), CellStmt(..), CellId(..), CellType(..), ParameterSign(..),
+    CellBodyStmt(..),
+
+    -- Processes
+    DestSigSpec(..), SrcSigSpec(..), AssignStmt(..),
+
+    -- Switches
+    Switch(..), SwitchStmt(..), Case(..), CaseStmt(..), Compare(..),
+    CaseBodyVariants(..), CaseBody(..)
+) where
+
 import Text.Read (Lexeme(Ident))
 import Data.Functor.Contravariant (Contravariant)
 import GHC.RTS.Flags (DoCostCentres(CostCentresAll))
@@ -99,5 +128,23 @@ data CellBodyStmt   = CellBodyParameter
                     deriving (Show)
 
 -- Processes
+data DestSigSpec    = DestSigSpec SigSpec  deriving (Show)
+data SrcSigSpec     = SrcSigSpec  SigSpec  deriving (Show)
+data AssignStmt     = AssignStmt  DestSigSpec SrcSigSpec
+                    deriving (Show)
+
 -- Switches
+data Switch         = Switch SwitchStmt [AttrStmt] [Case]
+                      deriving (Show)
+data SwitchStmt     = SwitchStmt SigSpec [AttrStmt] deriving (Show)
+data Case           = Case CaseStmt [AttrStmt] [AssignStmt] CaseBody
+                      deriving (Show)
+data CaseStmt       = CaseStmt (Maybe Compare)
+                      deriving (Show)
+data Compare        = Compare SigSpec [SigSpec]
+                      deriving (Show)
+data CaseBodyVariants   = CaseBodySwitchVariant Switch
+                        | CaseBodyAssignVariant AssignStmt
+                        deriving (Show)
+data CaseBody       = CaseBody [CaseBodyVariants] deriving (Show)
 -- Syncs

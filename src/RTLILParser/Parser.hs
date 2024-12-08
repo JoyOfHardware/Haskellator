@@ -3,18 +3,46 @@ module RTLILParser.Parser(a, val) where
 import Control.Monad (void)
 import Text.Parsec
 import Text.Parsec.String (Parser)
-import RTLILParser.AST(
-    AutoIdxStmt(..)    ,ParamStmt(..)       ,AutogenId(..)
-   ,Constant(..)       ,CellStmt(..)        ,PublicId(..)
-   ,AttrStmt(..)       ,Value(..)           ,Id(..)
-   ,CellId(..)         ,CellType(..)        ,WireId(..)
-   ,SigSpec(..)        ,Slice(..)           ,ConnStmt(..)
-   ,WireOption(..)     ,WireStmt(..)        ,Wire(..)
-   ,MemoryOption(..)   ,MemoryStmt(..)      ,Memory(..)
-   ,MemoryID(..)       ,CellBodyStmt(..)    ,ParameterSign(..)
-   ,Cell(..)
-    )
 import Util(binaryStringToInt)
+import RTLILParser.AST (
+    -- Identifiers
+    Id(..), PublicId(..), AutogenId(..),
+
+    -- Values
+    Value(..),
+
+    -- Autoindex statements
+    AutoIdxStmt(..),
+
+    -- Module
+    ParamStmt(..), Constant(..),
+
+    -- Attribute statements
+    AttrStmt(..),
+
+    -- Signal Specifications
+    SigSpec(..), Slice(..),
+
+    -- Connections
+    ConnStmt(..),
+
+    -- Wires
+    Wire(..), WireStmt(..), WireId(..), WireOption(..),
+
+    -- Memories
+    Memory(..), MemoryStmt(..), MemoryID(..), MemoryOption(..),
+
+    -- Cells
+    Cell(..), CellStmt(..), CellId(..), CellType(..), ParameterSign(..),
+    CellBodyStmt(..),
+
+    -- Processes
+    DestSigSpec(..), SrcSigSpec(..), AssignStmt(..),
+
+    -- Switches
+    Switch(..), SwitchStmt(..), Case(..), CaseStmt(..), Compare(..),
+    CaseBodyVariants(..), CaseBody(..)
+    )
 import RTLILParser.Primitives(
     pWs
    ,pNonWs
@@ -131,7 +159,7 @@ applySlices base = do
 pSlice :: Parser Slice
 pSlice =
     Slice
-    <$> (char '[' *> pMaybeWs *> pInteger <* pMaybeWs)
+    <$> (pMaybeWs *> char '[' *> pMaybeWs *> pInteger <* pMaybeWs)
     <*> (optionMaybe (char ':' *> pInteger) <* pMaybeWs <* char ']')
 
 -- Connections
@@ -233,10 +261,29 @@ pCellBodyConnect = do
     _       <- string "connect" <* pWs
     id      <- pId <* pWs
     sigSpec <- pSigSpec <* pEol
-    return $ CellConnect id sigSpec
+    return  $ CellConnect id sigSpec
 
 -- Processes
+pDestSigSpec :: Parser DestSigSpec
+pDestSigSpec = DestSigSpec <$> pSigSpec
+
+pSrcSigSpec :: Parser SrcSigSpec
+pSrcSigSpec = SrcSigSpec <$> pSigSpec
+
+pAssignStmt :: Parser AssignStmt
+pAssignStmt = AssignStmt
+    <$> (string "assign" *> pWs *> pDestSigSpec)
+    <*> (pWs *> pSrcSigSpec <* pEol)
+
 -- Switches
+pCaseStmt :: Parser CaseStmt
+pCaseStmt = CaseStmt
+    <$> (string "case" *> pWs *> optionMaybe pCompare <* pEol)
+
+pCompare :: Parser Compare
+pCompare = Compare
+    <$> pSigSpec
+    <*> many (char ',' *> pMaybeWs *> pSigSpec)
 -- Syncs
 
 
