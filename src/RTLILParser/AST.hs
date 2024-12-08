@@ -1,12 +1,13 @@
 module RTLILParser.AST(
-    AutoIdxStmt(..)    ,ParamStmt(..)  ,AutogenId(..)
-   ,Constant(..)       ,CellStmt(..)   ,PublicId(..)
-   ,AttrStmt(..)       ,Value(..)      ,Id(..)
-   ,CellId(..)         ,CellType(..)   ,WireId(..)
-   ,SigSpec(..)        ,Slice(..)      ,ConnStmt(..)
-   ,WireOption(..)     ,WireStmt(..)   ,Wire(..)
-   ,MemoryOption(..)   ,MemoryStmt(..) ,Memory(..)
-   ,MemoryID(..)
+    AutoIdxStmt(..)    ,ParamStmt(..)       ,AutogenId(..)
+   ,Constant(..)       ,CellStmt(..)        ,PublicId(..)
+   ,AttrStmt(..)       ,Value(..)           ,Id(..)
+   ,CellId(..)         ,CellType(..)        ,WireId(..)
+   ,SigSpec(..)        ,Slice(..)           ,ConnStmt(..)
+   ,WireOption(..)     ,WireStmt(..)        ,Wire(..)
+   ,MemoryOption(..)   ,MemoryStmt(..)      ,Memory(..)
+   ,MemoryID(..)       ,CellBodyStmt(..)    ,ParameterSign(..)
+   ,Cell(..)
     ) where
 import Text.Read (Lexeme(Ident))
 import Data.Functor.Contravariant (Contravariant)
@@ -84,9 +85,18 @@ data MemoryOption   = MemoryOptionWidth     Int
                     deriving (Show)
 
 -- Cells
+data Cell           = Cell          CellStmt [AttrStmt] [CellBodyStmt]
+                      deriving (Show)
 data CellStmt       = CellStmt      CellId CellType  deriving (Show)
 data CellId         = CellId        Id deriving (Show)
 data CellType       = CellType      Id deriving (Show)
+data ParameterSign  = Signed | Real deriving (Show)
+data CellBodyStmt   = CellBodyParameter 
+                        (Maybe ParameterSign)
+                        Id
+                        Constant
+                    | CellConnect Id SigSpec
+                    deriving (Show)
 
 -- Processes
 -- Switches

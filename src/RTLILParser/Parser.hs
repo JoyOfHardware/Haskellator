@@ -4,14 +4,15 @@ import Control.Monad (void)
 import Text.Parsec
 import Text.Parsec.String (Parser)
 import RTLILParser.AST(
-    AutoIdxStmt(..)    ,ParamStmt(..)  ,AutogenId(..)
-   ,Constant(..)       ,CellStmt(..)   ,PublicId(..)
-   ,AttrStmt(..)       ,Value(..)      ,Id(..)
-   ,CellId(..)         ,CellType(..)   ,WireId(..)
-   ,SigSpec(..)        ,Slice(..)      ,ConnStmt(..)
-   ,WireOption(..)     ,WireStmt(..)   ,Wire(..)
-   ,MemoryOption(..)   ,MemoryStmt(..) ,Memory(..)
-   ,MemoryID(..)
+    AutoIdxStmt(..)    ,ParamStmt(..)       ,AutogenId(..)
+   ,Constant(..)       ,CellStmt(..)        ,PublicId(..)
+   ,AttrStmt(..)       ,Value(..)           ,Id(..)
+   ,CellId(..)         ,CellType(..)        ,WireId(..)
+   ,SigSpec(..)        ,Slice(..)           ,ConnStmt(..)
+   ,WireOption(..)     ,WireStmt(..)        ,Wire(..)
+   ,MemoryOption(..)   ,MemoryStmt(..)      ,Memory(..)
+   ,MemoryID(..)       ,CellBodyStmt(..)    ,ParameterSign(..)
+   ,Cell(..)
     )
 import Util(binaryStringToInt)
 import RTLILParser.Primitives(
@@ -83,8 +84,8 @@ pModuleStmt = string "module" *> pWs *> pId <* pEol
 
 pParamStmt :: Parser ParamStmt
 pParamStmt = ParamStmt
-    <$> (string "parameter" *> pWs *> pId)
-    <*> optionMaybe (pWs *> pConstant)
+    <$> (string "parameter" *> pWs *> pId <* pWs)
+    <*> optionMaybe pConstant
     <*  pEol
 
 pConstant :: Parser Constant
@@ -194,15 +195,45 @@ pMemoryOption =
     try (MemoryOptionOffset <$> (string "offset" *> pWs *> pInteger))
 
 -- Cells
+pCell :: Parser Cell
+pCell = do
+    attrStmts       <- many pAttrStmt
+    cellStmt        <- pCellStmt
+    cellBodyStmts   <- many pCellBodyStmt
+    return $ Cell cellStmt attrStmts cellBodyStmts
+
 pCellStmt :: Parser CellStmt
 pCellStmt = do
     _ <- string "cell"
     _ <- pWs
-    cellId <- CellId <$> pId
-    _ <- pWs
     cellType <- CellType <$> pId
+    _ <- pWs
+    cellId <- CellId <$> pId
     _ <- pEol
     return $ CellStmt cellId cellType
+
+pCellBodyStmt :: Parser CellBodyStmt
+pCellBodyStmt = pCellBodyParameter <|> pCellBodyConnect
+
+pParameterSign :: Parser ParameterSign
+pParameterSign =
+    (Signed     <$ string "signed") <|>
+    (Real       <$ string "real")
+
+pCellBodyParameter :: Parser CellBodyStmt
+pCellBodyParameter = do
+    _       <- string "parameter" <* pWs
+    sign    <- optionMaybe pParameterSign <* pMaybeWs
+    id      <- pId
+    const   <- pConstant <* pEol
+    return $ CellBodyParameter sign id const
+
+pCellBodyConnect :: Parser CellBodyStmt
+pCellBodyConnect = do
+    _       <- string "connect" <* pWs
+    id      <- pId <* pWs
+    sigSpec <- pSigSpec <* pEol
+    return $ CellConnect id sigSpec
 
 -- Processes
 -- Switches
