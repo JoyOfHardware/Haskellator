@@ -1,6 +1,6 @@
 module RTLILParser.Parser(
     preProcessDiscardComments,
-    pFile,
+    RTLILParser.Parser.runParser,
     a,
     val) where
 
@@ -68,16 +68,24 @@ import RTLILParser.Primitives(
 -- taken from: https://yosyshq.readthedocs.io/projects/yosys/en/0.47/appendix/rtlil_text.html
 -- parsers below are split int sections from the above link
 
+runParser str = case parse pFile "pFile" preProcessedFile of
+    Left err -> error $ show err
+    Right val -> val
+    where preProcessedFile = preProcessDiscardComments str
+
 -- identifiers
 pId :: Parser Id
 pId = Public  <$> pPublicId
   <|> Autogen <$> pAutogenId
+  <?> "Id"
 
 pPublicId   :: Parser PublicId
 pPublicId   = PublicId <$> (char '\\' *> many1 pNonWs)
+    <?> "PublicId"
 
 pAutogenId  :: Parser AutogenId
 pAutogenId  = AutogenId <$> (char '$' *> many1 pNonWs)
+    <?> "AutogenId"
 
 -- values
 pValue :: Parser Value
@@ -86,6 +94,7 @@ pValue = do
     char '\''
     value <- many pBinaryDigit
     return $ Value (read width) (binaryStringToInt value)
+    <?> "Value"
 
 pDecimalDigit :: Parser Char
 pDecimalDigit = oneOf "0123456789"
@@ -93,7 +102,7 @@ pDecimalDigit = oneOf "0123456789"
 -- update in the future to support 4 state logic
 -- by converting x and z to 0 and warning about it.
 pBinaryDigit :: Parser Char
-pBinaryDigit = oneOf "01"
+pBinaryDigit = oneOf "01" <?> "BinaryDigit"
 
 pInteger :: Parser Int
 pInteger = do
@@ -103,37 +112,46 @@ pInteger = do
     return $ case sign of
         Just _  -> -value
         Nothing ->  value
+    <?> "Integer"
 
 -- strings
 pString :: Parser String
 pString =
     between delimiter delimiter parseString
+    <?> "String"
     where
         delimiter = char '"'
         parseString = many (pEscapedChar <|> noneOf "\\\"")
 
 -- comments
--- | Removes inline comments starting with '#' while preserving newlines
+-- | Removes entire comment lines starting with '#' and inline comments
 preProcessDiscardComments :: String -> String
-preProcessDiscardComments input = unlines $ map stripComment $ lines input
-  where
-    -- Strips comments from a single line
-    stripComment line = case break (== '#') line of
-        (code, "")   -> code       -- No comment found
-        (code, _)    -> code       -- Strip everything after '#'
+preProcessDiscardComments input = 
+    unlines $ map stripComment $ filter (not . isCommentLine) $ lines input
+    where
+      -- Checks if a line is a comment line (starts with '#')
+      isCommentLine line = case dropWhile (== ' ') line of
+          ('#':_) -> True   -- Line starts with '#'
+          _       -> False  -- Line does not start with '#'
 
+      -- Strips inline comments from a single line
+      stripComment line = case break (== '#') line of
+          (code, "") -> code    -- No comment found
+          (code, _)  -> code    -- Strip everything after '#'
 
 -- file
 pFile :: Parser File
 pFile = File
     <$> pAutoIdxStmt
     <*> many pModule
+    <?> "File"
 
 -- Autoindex statements
 pAutoIdxStmt :: Parser AutoIdxStmt
 pAutoIdxStmt = AutoIdxStmt
     <$> (string "autoidx" *> pWs *>
          pInteger <* pEolAndAdvanceToNextNonWs)
+    <?> "AutoIdxStmt"
 
 -- Module
 pModule :: Parser Module
@@ -143,15 +161,18 @@ pModule = do
     moduleBody  <- pModuleBody
     pModuleEndStmt
     return $ Module moduleStmt attrs moduleBody
+    <?> "Module"
 
 pModuleStmt :: Parser ModuleStmt
 pModuleStmt = ModuleStmt 
     <$> (string "module" *> pWs *> 
          pId <* pEolAndAdvanceToNextNonWs)
+    <?> "ModuleStmt"
 
 pModuleBody :: Parser ModuleBody
 pModuleBody = ModuleBody
     <$> many pModuleBodyVariant
+    <?> "ModuleBody"
 
 pModuleBodyVariant :: Parser ModuleBodyVariant
 pModuleBodyVariant = 
@@ -167,92 +188,125 @@ pModuleBodyVariant =
     try (ModuleBodyMemory       <$> pMemory   ) <|>
     try (ModuleBodyCell         <$> pCell     ) <|>
         (ModuleBodyProcess      <$> pProcess  )
+    <?> "ModuleBodyVariant"
 
 pParamStmt :: Parser ParamStmt
 pParamStmt = ParamStmt
     <$> (string "parameter" *> pWs *> pId <* pWs)
     <*> optionMaybe pConstant
     <*  pEolAndAdvanceToNextNonWs
+    <?> "ParamStmt"
 
 pConstant :: Parser Constant
-pConstant =
-    try (ConstantValue      <$> pValue  )
-    <|> (ConstantInteger    <$> pInteger)
-    <|> (ConstantString     <$> pString )
+pConstant = p <?> name where
+    name = "Constant"
+    p = 
+        try (ConstantValue      <$> pValue  )
+        <|> (ConstantInteger    <$> pInteger)
+        <|> (ConstantString     <$> pString )
 
 pModuleEndStmt :: Parser ()
-pModuleEndStmt = void (string "end")
+pModuleEndStmt = p <?> name where
+    name = "ModuleEndStmt"
+    p = 
+        void (string "end")
 
 -- Attribute statements
 pAttrStmt :: Parser AttrStmt
-pAttrStmt = AttrStmt
-    <$> (string "attribute" *> pWs *> pId)
-    <*> (pWs *> pConstant)
-    <*  pEolAndAdvanceToNextNonWs
+pAttrStmt = p <?> name where
+    name = "AttrStmt"
+    p = 
+        AttrStmt
+        <$> (string "attribute" *> pWs *> pId)
+        <*> (pWs *> pConstant)
+        <*  pEolAndAdvanceToNextNonWs
 
 -- Signal Specifications
 pSigSpec :: Parser SigSpec
-pSigSpec = do
-    baseSigSpec <- (SigSpecConstant <$> pConstant)
-                   <|>
-                   (SigSpecWireId   <$> pWireId)
-                   <|>
-                   pSigSpecConcat
-    applySlices baseSigSpec
+pSigSpec = p <?> name where
+    name = "SigSpec"
+    p =
+        do
+        baseSigSpec <- (SigSpecConstant <$> pConstant)
+                    <|>
+                    (SigSpecWireId   <$> pWireId)
+                    <|>
+                    pSigSpecConcat
+        applySlices baseSigSpec
 
 pSigSpecConcat :: Parser SigSpec
-pSigSpecConcat = do
-    char '{' <* pWs
-    sigspecs    <- pSigSpec `sepBy` pWs
-    pWs <* char '}'
-    return $ SigSpecConcat sigspecs
+pSigSpecConcat = p <?> name where
+    name = "SigSpecConcat"
+    p = 
+        do
+        char '{' <* pWs
+        sigspecs    <- pSigSpec `sepBy` pWs
+        pWs <* char '}'
+        return $ SigSpecConcat sigspecs
 
 applySlices :: SigSpec -> Parser SigSpec
-applySlices base = do
-    maybeSlice <- optionMaybe pSlice
-    case maybeSlice of
-        Nothing -> return base
-        Just slice -> applySlices (SigSpecSlice base slice)
+applySlices base = p <?> name where
+    name = "ApplySlices"
+    p =
+        do
+        maybeSlice <- optionMaybe pSlice
+        case maybeSlice of
+            Nothing -> return base
+            Just slice -> applySlices (SigSpecSlice base slice)
 
 pSlice :: Parser Slice
-pSlice =
-    Slice
-    <$> (pMaybeWs *> char '[' *> pMaybeWs *> pInteger <* pMaybeWs)
-    <*> (optionMaybe (char ':' *> pInteger) <* pMaybeWs <* char ']')
+pSlice = p <?> name where
+    name = "Slice"
+    p =
+        Slice
+        <$> (pMaybeWs *> char '[' *> pMaybeWs *> pInteger <* pMaybeWs)
+        <*> (optionMaybe (char ':' *> pInteger) <* pMaybeWs <* char ']')
 
 -- Connections
 pConnStmt :: Parser ConnStmt
-pConnStmt = ConnStmt
-    <$> (string "connect" *> pWs *> pSigSpec)
-    <*> (pWs *> pSigSpec)
-    <*  pEolAndAdvanceToNextNonWs
+pConnStmt = p <?> name where
+    name = "ConnStmt"
+    p =
+        ConnStmt
+        <$> (string "connect" *> pWs *> pSigSpec)
+        <*> (pWs *> pSigSpec)
+        <*  pEolAndAdvanceToNextNonWs
 
 -- Wires
 pWire :: Parser Wire
-pWire = do
-    attrs <- many pAttrStmt
-    wireStmt <- pWireStmt
-    return $ Wire wireStmt attrs
+pWire = p <?> name where
+    name = "Wire"
+    p = do
+        attrs <- many pAttrStmt
+        wireStmt <- pWireStmt
+        return $ Wire wireStmt attrs
 
 pWireStmt :: Parser WireStmt
-pWireStmt = do
-    string "wire" <* pWs
-    options <- many pWireOption <* pWs
-    wireId  <- WireId <$> pId <* pEolAndAdvanceToNextNonWs
-    return $ WireStmt wireId options
+pWireStmt = p <?> name where
+    name = "WireStmt"
+    p = do
+        string "wire" <* pWs
+        options <- many pWireOption <* pWs
+        wireId  <- WireId <$> pId <* pEolAndAdvanceToNextNonWs
+        return $ WireStmt wireId options
 
 pWireId :: Parser WireId
-pWireId = WireId <$> pId
+pWireId = p <?> name where
+    name = "WireId"
+    p = 
+        WireId <$> pId
 
 pWireOption :: Parser WireOption
-pWireOption =
-    try (WireOptionWidth  <$> (string "width"  *> pWs *> pInteger)) <|>
-    try (WireOptionOffset <$> (string "offset" *> pWs *> pInteger)) <|>
-    try (WireOptionInput  <$> (string "input"  *> pWs *> pInteger)) <|>
-    try (WireOptionOutput <$> (string "output" *> pWs *> pInteger)) <|>
-    try (WireOptionInout  <$> (string "inout"  *> pWs *> pInteger)) <|>
-    (string "upto"      *> return WireOptionUpto)                   <|>
-    (string "signed"    *> return WireOptionSigned)
+pWireOption = p <?> name where
+    name = "WireOption"
+    p = 
+        try (WireOptionWidth  <$> (string "width"  *> pWs *> pInteger)) <|>
+        try (WireOptionOffset <$> (string "offset" *> pWs *> pInteger)) <|>
+        try (WireOptionInput  <$> (string "input"  *> pWs *> pInteger)) <|>
+        try (WireOptionOutput <$> (string "output" *> pWs *> pInteger)) <|>
+        try (WireOptionInout  <$> (string "inout"  *> pWs *> pInteger)) <|>
+        (string "upto"      *> return WireOptionUpto)                   <|>
+        (string "signed"    *> return WireOptionSigned)
 
 -- Memories
 pMemory :: Parser Memory

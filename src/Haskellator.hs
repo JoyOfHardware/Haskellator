@@ -1,3 +1,11 @@
-module Haskellator(val) where
+module Haskellator(
+    val,
+    preProcessDiscardComments,
+    runParser
+    ) where
 
-    import RTLILParser.Parser(val)
+    import RTLILParser.Parser(
+        val,
+        preProcessDiscardComments,
+        runParser,
+        )

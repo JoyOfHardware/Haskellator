@@ -1,4 +1,4 @@
- # General and Planning
+# General and Planning
  - [ ] might need many validation phases
    - [ ] it's conceivable that one could construct a Yosys memory Cell 
          with invalid parameters
@@ -34,7 +34,7 @@
        parser doesn't conflict(exhibit a partial early match) with 
        the argument of the parser after the argument of the `many` parser.
 
- # Parser Development
+# Parser Development
  - [x] Sync
  - [ ] Process
  - [x] Finish `pCell` with `pCellEndStmt`
@@ -42,6 +42,8 @@
  - [x] Remove all instances of `_ <-`
  - [ ] Module
  - [ ] Remove weird GHC imports
+ - [ ] Embed locs in AST
+ - [ ] Remove `preProcessDiscardComments` from exports
  - [x] Are the `try` statements in `pWireOption` correctly constructed?
  - [ ] Consider the very weird case where the process body has nothing,
        thus, `pEolAndAdvanceToNextNonWs` may never get invoked in any of
@@ -56,7 +58,7 @@
             I still need to verify how other parsers behave. For example, what
             happens if we have a cell with no `<cell-body-stmt>`
 
- # Parser Verification
+# Parser Verification
  - [ ] I think only EOL terminated parsers should be responsible 
        for advancing the Parsec scanner to the next non-space...
  - [ ] lift grammar into prover and show that all EOL terminated parsers
