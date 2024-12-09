@@ -41,7 +41,10 @@ import RTLILParser.AST (
 
     -- Switches
     Switch(..), SwitchStmt(..), Case(..), CaseStmt(..), Compare(..),
-    CaseBodyVariants(..), CaseBody(..)
+    CaseBodyVariants(..), CaseBody(..),
+
+    -- Syncs
+    Sync(..), SyncStmt(..), SyncType(..), UpdateStmt(..)
     )
 import RTLILParser.Primitives(
     pWs
@@ -50,6 +53,7 @@ import RTLILParser.Primitives(
    ,pEol
    ,pOctal
    ,pEscapedChar
+   ,pEolAndAdvanceToNextNonWs
     )
 import Text.Parsec.Token (GenLanguageDef(caseSensitive))
 import GHC.IO.Handle.Types (Handle__(Handle__))
@@ -106,17 +110,20 @@ pString =
 
 -- Autoindex statements
 pAutoIdxStmt :: Parser AutoIdxStmt
-pAutoIdxStmt = AutoIdxStmt <$> (string "autoidx" *> pWs *> pInteger <* pEol <* pMaybeWs)
+pAutoIdxStmt = AutoIdxStmt 
+    <$> (string "autoidx" *> pWs *> 
+         pInteger <* pEolAndAdvanceToNextNonWs)
 
 -- Module
 pModuleStmt :: Parser Id
-pModuleStmt = string "module" *> pWs *> pId <* pEol <* pMaybeWs
+pModuleStmt = string "module" *> pWs *> pId <* 
+              pEolAndAdvanceToNextNonWs
 
 pParamStmt :: Parser ParamStmt
 pParamStmt = ParamStmt
     <$> (string "parameter" *> pWs *> pId <* pWs)
     <*> optionMaybe pConstant
-    <*  pEol <*  pMaybeWs
+    <*  pEolAndAdvanceToNextNonWs
 
 pConstant :: Parser Constant
 pConstant =
@@ -132,7 +139,7 @@ pAttrStmt :: Parser AttrStmt
 pAttrStmt = AttrStmt
     <$> (string "attribute" *> pWs *> pId)
     <*> (pWs *> pConstant)
-    <*  pEol <* pMaybeWs
+    <*  pEolAndAdvanceToNextNonWs
 
 -- Signal Specifications
 pSigSpec :: Parser SigSpec
@@ -169,7 +176,7 @@ pConnStmt :: Parser ConnStmt
 pConnStmt = ConnStmt
     <$> (string "connect" *> pWs *> pSigSpec)
     <*> (pWs *> pSigSpec)
-    <*  pEol <* pMaybeWs
+    <*  pEolAndAdvanceToNextNonWs
 
 -- Wires
 pWire :: Parser Wire
@@ -186,7 +193,7 @@ pWireStmt =
     <*> (WireId <$> pId)
     <*  pWs
     <*> many pWireOption
-    <*  pEol <* pMaybeWs
+    <*  pEolAndAdvanceToNextNonWs
 
 pWireId :: Parser WireId
 pWireId = WireId <$> pId
@@ -216,7 +223,7 @@ pMemoryStmt =
     <*> (MemoryID <$> pId)
     <*  pWs
     <*> many pMemoryOption
-    <*  pEol <* pMaybeWs
+    <*  pEolAndAdvanceToNextNonWs
 
 pMemoryOption :: Parser MemoryOption
 pMemoryOption =
@@ -239,7 +246,7 @@ pCellStmt = do
     cellType <- CellType <$> pId
     _ <- pWs
     cellId <- CellId <$> pId
-    _ <- pEol <* pMaybeWs
+    _ <- pEolAndAdvanceToNextNonWs
     return $ CellStmt cellId cellType
 
 pCellBodyStmt :: Parser CellBodyStmt
@@ -255,37 +262,33 @@ pCellBodyParameter = do
     _       <- string "parameter" <* pWs
     sign    <- optionMaybe pParameterSign <* pMaybeWs
     id      <- pId
-    const   <- pConstant <* pEol <* pMaybeWs
+    const   <- pConstant <* pEolAndAdvanceToNextNonWs
     return $ CellBodyParameter sign id const
 
 pCellBodyConnect :: Parser CellBodyStmt
 pCellBodyConnect = do
     _       <- string "connect" <* pWs
     id      <- pId <* pWs
-    sigSpec <- pSigSpec <* pEol <* pMaybeWs
+    sigSpec <- pSigSpec <* pEolAndAdvanceToNextNonWs
     return  $ CellConnect id sigSpec
 
 -- Processes
+-- pProcessBody :: 
+pAssignStmt :: Parser AssignStmt
+pAssignStmt = AssignStmt
+    <$> (string "assign" *> pWs *> pDestSigSpec)
+    <*> (pWs *> pSrcSigSpec <* pEolAndAdvanceToNextNonWs)
+
 pDestSigSpec :: Parser DestSigSpec
 pDestSigSpec = DestSigSpec <$> pSigSpec
 
 pSrcSigSpec :: Parser SrcSigSpec
 pSrcSigSpec = SrcSigSpec <$> pSigSpec
 
-pAssignStmt :: Parser AssignStmt
-pAssignStmt = AssignStmt
-    <$> (string "assign" *> pWs *> pDestSigSpec)
-    <*> (pWs *> pSrcSigSpec <* pEol <* pMaybeWs)
+pProcEndStmt :: Parser ()
+pProcEndStmt = void (string "end" <* pEolAndAdvanceToNextNonWs)
 
 -- Switches
--- - [ ] <switch>            ::= <switch-stmt> <case>* <switch-end-stmt>
--- - [ ] <switch-stmt>       ::= <attr-stmt>* switch <sigspec> <eol>
--- - [ ] <case>              ::= <attr-stmt>* <case-stmt> <case-body>
--- - [x] <case-stmt>         ::= case <compare>? <eol>
--- - [x] <compare>           ::= <sigspec> (, <sigspec>)*
--- - [ ] <case-body>         ::= (<switch> | <assign-stmt>)*
--- - [ ] <switch-end-stmt>   ::= end <eol>
-
 pSwitch :: Parser Switch
 pSwitch = Switch
     <$> pSwitchStmt
@@ -295,7 +298,7 @@ pSwitchStmt :: Parser SwitchStmt
 pSwitchStmt = do
     attrs   <- many pAttrStmt
     _       <- string "switch"  <* pWs
-    sigspec <- pSigSpec <* pEol <* pMaybeWs
+    sigspec <- pSigSpec <* pEolAndAdvanceToNextNonWs
     return $ SwitchStmt sigspec attrs
 
 pCase :: Parser Case
@@ -309,7 +312,7 @@ pCaseStmt = CaseStmt
     <$> (
         string "case" *> pWs 
         *> optionMaybe pCompare 
-        <* pEol <* pMaybeWs)
+        <* pEolAndAdvanceToNextNonWs)
 
 pCompare :: Parser Compare
 pCompare = Compare
@@ -324,11 +327,21 @@ pCaseBodyVariant =
         (CaseBodyAssignVariant <$> pAssignStmt)
 
 pSwitchEndStmt :: Parser ()
-pSwitchEndStmt = void (string "end" *> pEol *> pMaybeWs)
+pSwitchEndStmt = void (string "end" *> pEolAndAdvanceToNextNonWs)
 
 -- Syncs
+pSyncType :: Parser SyncType
+pSyncType =
+    (Low        <$ string "low"     )   <|>
+    (High       <$ string "high"    )   <|>
+    (Posedge    <$ string "posedge" )   <|>
+    (Negedge    <$ string "negedge" )   <|>
+    (Edge       <$ string "edge"    )
 
-
+pUpdateStmt :: Parser UpdateStmt
+pUpdateStmt = UpdateStmt
+    <$> (string "update" *> pWs *> pDestSigSpec)
+    <*> (pWs *> pSrcSigSpec <* pEolAndAdvanceToNextNonWs)
 
  
 -- would correspond to `123456789[0:9][0:8]`

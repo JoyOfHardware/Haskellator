@@ -35,7 +35,10 @@ module RTLILParser.AST (
 
     -- Switches
     Switch(..), SwitchStmt(..), Case(..), CaseStmt(..), Compare(..),
-    CaseBodyVariants(..), CaseBody(..)
+    CaseBodyVariants(..), CaseBody(..),
+
+    -- Syncs
+    Sync(..), SyncStmt(..), SyncType(..), UpdateStmt(..)
 ) where
 
 import Text.Read (Lexeme(Ident))
@@ -128,10 +131,11 @@ data CellBodyStmt   = CellBodyParameter
                     deriving (Show)
 
 -- Processes
+-- data ProcessBody    = ProcessBody [AssignStmt]
+data AssignStmt     = AssignStmt  DestSigSpec SrcSigSpec
+                      deriving (Show)
 data DestSigSpec    = DestSigSpec SigSpec  deriving (Show)
 data SrcSigSpec     = SrcSigSpec  SigSpec  deriving (Show)
-data AssignStmt     = AssignStmt  DestSigSpec SrcSigSpec
-                    deriving (Show)
 
 -- Switches
 data Switch         = Switch SwitchStmt [Case]
@@ -147,4 +151,18 @@ data CaseBodyVariants   = CaseBodySwitchVariant Switch
                         | CaseBodyAssignVariant AssignStmt
                         deriving (Show)
 data CaseBody       = CaseBody [CaseBodyVariants] deriving (Show)
+
 -- Syncs
+data Sync           = Sync SyncStmt [UpdateStmt] deriving (Show)
+data SyncStmt       = SigSpecPredicated SyncType SigSpec
+                    | Global
+                    | Init
+                    | Always
+                    deriving (Show)
+data SyncType       = Low
+                    | High
+                    | Posedge
+                    | Negedge
+                    | Edge
+                    deriving (Show)
+data UpdateStmt     = UpdateStmt DestSigSpec SrcSigSpec deriving (Show)

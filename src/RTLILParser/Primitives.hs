@@ -5,6 +5,7 @@ module RTLILParser.Primitives(
    ,pEol
    ,pOctal
    ,pEscapedChar
+   ,pEolAndAdvanceToNextNonWs
 ) where
 
 import Control.Monad (void)
@@ -43,3 +44,6 @@ pNonWs = noneOf " \t\r\n"
 
 pEol :: Parser String
 pEol = many1 (oneOf "\r\n")
+
+pEolAndAdvanceToNextNonWs :: Parser ()
+pEolAndAdvanceToNextNonWs = void $ pEol *> pMaybeWs
