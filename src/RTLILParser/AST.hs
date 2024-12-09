@@ -139,7 +139,7 @@ data Process        = Process ProcStmt [AttrStmt] ProcessBody
 data ProcStmt       = ProcStmt Id deriving (Show)
 data ProcessBody    = ProcessBody 
                         [AssignStmt]
-                        Switch 
+                        (Maybe Switch)
                         [AssignStmt] 
                         [Sync] 
                     deriving (Show)

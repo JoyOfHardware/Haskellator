@@ -37,7 +37,8 @@ import RTLILParser.AST (
     CellBodyStmt(..),
 
     -- Processes
-    DestSigSpec(..), SrcSigSpec(..), AssignStmt(..),
+    Process(..), ProcStmt(..), ProcessBody(..), AssignStmt(..),
+    DestSigSpec(..), SrcSigSpec(..),
 
     -- Switches
     Switch(..), SwitchStmt(..), Case(..), CaseStmt(..), Compare(..),
@@ -55,8 +56,6 @@ import RTLILParser.Primitives(
    ,pEscapedChar
    ,pEolAndAdvanceToNextNonWs
     )
-import Text.Parsec.Token (GenLanguageDef(caseSensitive))
-import GHC.IO.Handle.Types (Handle__(Handle__))
 
 -- taken from: https://yosyshq.readthedocs.io/projects/yosys/en/0.47/appendix/rtlil_text.html
 -- parsers below are split int sections from the above link
@@ -76,7 +75,7 @@ pAutogenId  = AutogenId <$> (char '$' *> many1 pNonWs)
 pValue :: Parser Value
 pValue = do
     width <- many1 pDecimalDigit
-    _ <- char '\''
+    char '\''
     value <- many pBinaryDigit
     return $ Value (read width) (binaryStringToInt value)
 
@@ -110,13 +109,13 @@ pString =
 
 -- Autoindex statements
 pAutoIdxStmt :: Parser AutoIdxStmt
-pAutoIdxStmt = AutoIdxStmt 
-    <$> (string "autoidx" *> pWs *> 
+pAutoIdxStmt = AutoIdxStmt
+    <$> (string "autoidx" *> pWs *>
          pInteger <* pEolAndAdvanceToNextNonWs)
 
 -- Module
 pModuleStmt :: Parser Id
-pModuleStmt = string "module" *> pWs *> pId <* 
+pModuleStmt = string "module" *> pWs *> pId <*
               pEolAndAdvanceToNextNonWs
 
 pParamStmt :: Parser ParamStmt
@@ -153,9 +152,9 @@ pSigSpec = do
 
 pSigSpecConcat :: Parser SigSpec
 pSigSpecConcat = do
-    _           <- char '{' <* pWs
+    char '{' <* pWs
     sigspecs    <- pSigSpec `sepBy` pWs
-    _           <- pWs <* char '}'
+    pWs <* char '}'
     return $ SigSpecConcat sigspecs
 
 applySlices :: SigSpec -> Parser SigSpec
@@ -186,14 +185,11 @@ pWire = do
     return $ Wire wireStmt attrs
 
 pWireStmt :: Parser WireStmt
-pWireStmt =
-    WireStmt
-    <$  string "wire"
-    <*  pWs
-    <*> (WireId <$> pId)
-    <*  pWs
-    <*> many pWireOption
-    <*  pEolAndAdvanceToNextNonWs
+pWireStmt = do
+    string "wire" <* pWs
+    options <- many pWireOption <* pWs
+    wireId  <- WireId <$> pId <* pEolAndAdvanceToNextNonWs
+    return $ WireStmt wireId options
 
 pWireId :: Parser WireId
 pWireId = WireId <$> pId
@@ -216,14 +212,12 @@ pMemory = do
     return $ Memory memoryStmt attrs
 
 pMemoryStmt :: Parser MemoryStmt
-pMemoryStmt =
-    MemoryStmt
-    <$  string "memory"
-    <*  pWs
-    <*> (MemoryID <$> pId)
-    <*  pWs
-    <*> many pMemoryOption
-    <*  pEolAndAdvanceToNextNonWs
+pMemoryStmt = do
+    (string "memory" <* pWs)
+    options     <- (many pMemoryOption <* pWs)
+    memoryId    <- MemoryID <$> pId
+    pEolAndAdvanceToNextNonWs
+    return $ MemoryStmt memoryId options
 
 pMemoryOption :: Parser MemoryOption
 pMemoryOption =
@@ -236,17 +230,17 @@ pCell :: Parser Cell
 pCell = do
     attrStmts       <- many pAttrStmt
     cellStmt        <- pCellStmt
-    cellBodyStmts   <- many pCellBodyStmt
+    cellBodyStmts   <- many pCellBodyStmt <* pCellEndStmt
     return $ Cell cellStmt attrStmts cellBodyStmts
 
 pCellStmt :: Parser CellStmt
 pCellStmt = do
-    _ <- string "cell"
-    _ <- pWs
+    string "cell"
+    pWs
     cellType <- CellType <$> pId
-    _ <- pWs
+    pWs
     cellId <- CellId <$> pId
-    _ <- pEolAndAdvanceToNextNonWs
+    pEolAndAdvanceToNextNonWs
     return $ CellStmt cellId cellType
 
 pCellBodyStmt :: Parser CellBodyStmt
@@ -259,7 +253,7 @@ pParameterSign =
 
 pCellBodyParameter :: Parser CellBodyStmt
 pCellBodyParameter = do
-    _       <- string "parameter" <* pWs
+    string "parameter" <* pWs
     sign    <- optionMaybe pParameterSign <* pMaybeWs
     id      <- pId
     const   <- pConstant <* pEolAndAdvanceToNextNonWs
@@ -267,13 +261,41 @@ pCellBodyParameter = do
 
 pCellBodyConnect :: Parser CellBodyStmt
 pCellBodyConnect = do
-    _       <- string "connect" <* pWs
+    string "connect" <* pWs
     id      <- pId <* pWs
     sigSpec <- pSigSpec <* pEolAndAdvanceToNextNonWs
     return  $ CellConnect id sigSpec
 
+pCellEndStmt :: Parser ()
+pCellEndStmt = void (string "end" <* pEolAndAdvanceToNextNonWs)
+
 -- Processes
--- pProcessBody :: 
+pProcess :: Parser Process
+pProcess = do
+    attrs       <- many pAttrStmt
+    procStmt    <- pProcStmt
+    processBody <- pProcessBody
+    pProcEndStmt
+    return $ Process procStmt attrs processBody
+
+pProcStmt :: Parser ProcStmt
+pProcStmt = ProcStmt
+    <$> (string "process" *> pWs *> pId)
+    <*  pEolAndAdvanceToNextNonWs
+
+pProcessBody :: Parser ProcessBody
+pProcessBody = do
+    -- Since the pAssignStmt parser begins with "assign" and the pSwitch
+    -- parser technically begins with "attribute", these both starting
+    -- with the character 'a', we need to be able to rewind failed
+    -- attempts for `pAssignStmt` and `pSwitch` parsers as the first
+    -- character being an 'a' would have been consumed.
+    assignStmtsBefore   <- many $ try pAssignStmt
+    switch              <- optionMaybe $ try pSwitch
+    assignStmtsAfter    <- many pAssignStmt
+    syncs               <- many pSync
+    return $ ProcessBody assignStmtsBefore switch assignStmtsAfter syncs
+
 pAssignStmt :: Parser AssignStmt
 pAssignStmt = AssignStmt
     <$> (string "assign" *> pWs *> pDestSigSpec)
@@ -297,7 +319,7 @@ pSwitch = Switch
 pSwitchStmt :: Parser SwitchStmt
 pSwitchStmt = do
     attrs   <- many pAttrStmt
-    _       <- string "switch"  <* pWs
+    string "switch"  <* pWs
     sigspec <- pSigSpec <* pEolAndAdvanceToNextNonWs
     return $ SwitchStmt sigspec attrs
 
@@ -310,8 +332,8 @@ pCase = Case
 pCaseStmt :: Parser CaseStmt
 pCaseStmt = CaseStmt
     <$> (
-        string "case" *> pWs 
-        *> optionMaybe pCompare 
+        string "case" *> pWs
+        *> optionMaybe pCompare
         <* pEolAndAdvanceToNextNonWs)
 
 pCompare :: Parser Compare
@@ -337,7 +359,7 @@ pSync = Sync
 
 pSyncStmt :: Parser SyncStmt
 pSyncStmt =  pKeywordSync *>
-                pSigSpecPredicatedSyncStmt <|> 
+                pSigSpecPredicatedSyncStmt <|>
                 pNonSigSpecPredicatedSyncStmt
                 where pKeywordSync = string "sync" *> pWs
 
@@ -348,7 +370,7 @@ pSigSpecPredicatedSyncStmt = do
     return $ SigSpecPredicated sigSpec syncType
 
 pNonSigSpecPredicatedSyncStmt :: Parser SyncStmt
-pNonSigSpecPredicatedSyncStmt = 
+pNonSigSpecPredicatedSyncStmt =
     keyword <* pEolAndAdvanceToNextNonWs
     where keyword =
             (Global <$ string "global"  ) <|>

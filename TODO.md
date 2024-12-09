@@ -29,16 +29,35 @@
        with `pEolAndAdvanceToNextNonWs`
  - [x] Check inline sequencing of whitespace parsers in do blocks.
        Terminating instances of `pWs` should be preceeded by `<*`
+ - [ ] Verify no backtracking needed when sequencing `many` parsers.
+       Basically, we want to make sure that the argument of the `many`
+       parser doesn't conflict(exhibit a partial early match) with 
+       the argument of the parser after the argument of the `many` parser.
 
  # Parser Development
  - [x] Sync
  - [ ] Process
+ - [x] Finish `pCell` with `pCellEndStmt`
  - [ ] Rewrite `pWireStmt` and `pMemoryStmt` using do-notation...
+ - [x] Remove all instances of `_ <-`
  - [ ] Module
+ - [ ] Remove weird GHC imports
+ - [ ] Consider the very weird case where the process body has nothing,
+       thus, `pEolAndAdvanceToNextNonWs` may never get invoked in any of
+       the sub-parsers encapsulated in `pProcessBody`. Do we need to 
+       advance whitespaces so we can hit `<proc-end-stmt>`?
+      - [ ] What are the implications for other parsers?
+
+            I think that in this case we're OK as `<proc-stmt>` necessarily
+            precedes `<process-body>` and `<proc-stmt>` terminates in an EOL
+            parser that advances to the next non-whitespace.
+
+            I still need to verify how other parsers behave. For example, what
+            happens if we have a cell with no `<cell-body-stmt>`
 
  # Parser Verification
  - [ ] I think only EOL terminated parsers should be responsible 
-       for pre-winding the Parsec scanner to the next non-space...
+       for advancing the Parsec scanner to the next non-space...
  - [ ] lift grammar into prover and show that all EOL terminated parsers
        are either followed by EOF or a keyword such "module", "autoidx",
        etc
