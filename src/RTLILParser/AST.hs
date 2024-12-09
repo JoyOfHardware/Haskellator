@@ -154,7 +154,7 @@ data CaseBody       = CaseBody [CaseBodyVariants] deriving (Show)
 
 -- Syncs
 data Sync           = Sync SyncStmt [UpdateStmt] deriving (Show)
-data SyncStmt       = SigSpecPredicated SyncType SigSpec
+data SyncStmt       = SigSpecPredicated SigSpec SyncType
                     | Global
                     | Init
                     | Always

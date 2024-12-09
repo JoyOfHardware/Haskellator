@@ -25,9 +25,11 @@
  - [ ] may want to also derive equality statements
  - [x] replace both `pEol *> pMaybeWs` and `pEol <* pMaybeWs` 
        with `pEolAndAdvanceToNextNonWs`
+ - [ ] Check inline sequencing of whitespace parsers in do blocks.
+       Terminating instances of `pWs` should be preceeded by `<*`
 
  # Parser Development
-  - [ ] Sync
+  - [x] Sync
   - [ ] Process
   - [ ] Module
 

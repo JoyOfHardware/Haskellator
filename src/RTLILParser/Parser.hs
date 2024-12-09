@@ -330,6 +330,31 @@ pSwitchEndStmt :: Parser ()
 pSwitchEndStmt = void (string "end" *> pEolAndAdvanceToNextNonWs)
 
 -- Syncs
+pSync :: Parser Sync
+pSync = Sync
+    <$> pSyncStmt
+    <*> many pUpdateStmt
+
+pSyncStmt :: Parser SyncStmt
+pSyncStmt =  pKeywordSync *>
+                pSigSpecPredicatedSyncStmt <|> 
+                pNonSigSpecPredicatedSyncStmt
+                where pKeywordSync = string "sync" *> pWs
+
+pSigSpecPredicatedSyncStmt :: Parser SyncStmt
+pSigSpecPredicatedSyncStmt = do
+    syncType    <-  pSyncType <* pWs
+    sigSpec     <-  pSigSpec  <* pEolAndAdvanceToNextNonWs
+    return $ SigSpecPredicated sigSpec syncType
+
+pNonSigSpecPredicatedSyncStmt :: Parser SyncStmt
+pNonSigSpecPredicatedSyncStmt = 
+    keyword <* pEolAndAdvanceToNextNonWs
+    where keyword =
+            (Global <$ string "global"  ) <|>
+            (Init   <$ string "init"    ) <|>
+            (Always <$ string "always"  )
+
 pSyncType :: Parser SyncType
 pSyncType =
     (Low        <$ string "low"     )   <|>
@@ -343,7 +368,6 @@ pUpdateStmt = UpdateStmt
     <$> (string "update" *> pWs *> pDestSigSpec)
     <*> (pWs *> pSrcSigSpec <* pEolAndAdvanceToNextNonWs)
 
- 
 -- would correspond to `123456789[0:9][0:8]`
 exampleSigSpecSlice =
     SigSpecSlice
