@@ -11,11 +11,15 @@ import RTLILParser.AST (
     -- Values
     Value(..),
 
+    -- File
+    File(..),
+
     -- Autoindex statements
     AutoIdxStmt(..),
 
     -- Module
-    ParamStmt(..), Constant(..),
+    Module(..), ModuleStmt(..), ModuleBody(..),
+    ModuleBodyVariant(..), ParamStmt(..), Constant(..),
 
     -- Attribute statements
     AttrStmt(..),
@@ -106,6 +110,10 @@ pString =
 
 -- comments
 -- file
+pFile :: Parser File
+pFile = File
+    <$> pAutoIdxStmt
+    <*> many pModule
 
 -- Autoindex statements
 pAutoIdxStmt :: Parser AutoIdxStmt
@@ -114,9 +122,37 @@ pAutoIdxStmt = AutoIdxStmt
          pInteger <* pEolAndAdvanceToNextNonWs)
 
 -- Module
-pModuleStmt :: Parser Id
-pModuleStmt = string "module" *> pWs *> pId <*
-              pEolAndAdvanceToNextNonWs
+pModule :: Parser Module
+pModule = do
+    attrs       <- many pAttrStmt
+    moduleStmt  <- pModuleStmt
+    moduleBody  <- pModuleBody
+    pModuleEndStmt
+    return $ Module moduleStmt attrs moduleBody
+
+pModuleStmt :: Parser ModuleStmt
+pModuleStmt = ModuleStmt 
+    <$> (string "module" *> pWs *> 
+         pId <* pEolAndAdvanceToNextNonWs)
+
+pModuleBody :: Parser ModuleBody
+pModuleBody = ModuleBody
+    <$> many pModuleBodyVariant
+
+pModuleBodyVariant :: Parser ModuleBodyVariant
+pModuleBodyVariant = 
+    -- `pWire`, `pMemory`, `pCell`, `pProcess` all
+    -- start by parsing attribute statements, so we
+    -- need backtracking since we can't determin which
+    -- parser will succeed based on the first character
+    -- we encounter alone. `pParamStmt` technically doesn't
+    -- need to be prefixed by `try`, so that is a stylistic
+    -- choice.
+    try (ModuleBodyParamStmt    <$> pParamStmt) <|>
+    try (ModuleBodyWire         <$> pWire     ) <|>
+    try (ModuleBodyMemory       <$> pMemory   ) <|>
+    try (ModuleBodyCell         <$> pCell     ) <|>
+        (ModuleBodyProcess      <$> pProcess  )
 
 pParamStmt :: Parser ParamStmt
 pParamStmt = ParamStmt
@@ -126,9 +162,9 @@ pParamStmt = ParamStmt
 
 pConstant :: Parser Constant
 pConstant =
-    try (ConstantValue <$> pValue)
-    <|> (ConstantInteger <$> pInteger)
-    <|> (ConstantString <$> pString)
+    try (ConstantValue      <$> pValue  )
+    <|> (ConstantInteger    <$> pInteger)
+    <|> (ConstantString     <$> pString )
 
 pModuleEndStmt :: Parser ()
 pModuleEndStmt = void (string "end")

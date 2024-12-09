@@ -42,6 +42,7 @@
  - [x] Remove all instances of `_ <-`
  - [ ] Module
  - [ ] Remove weird GHC imports
+ - [x] Are the `try` statements in `pWireOption` correctly constructed?
  - [ ] Consider the very weird case where the process body has nothing,
        thus, `pEolAndAdvanceToNextNonWs` may never get invoked in any of
        the sub-parsers encapsulated in `pProcessBody`. Do we need to 

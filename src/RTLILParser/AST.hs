@@ -5,11 +5,15 @@ module RTLILParser.AST (
     -- Values
     Value(..),
 
+    -- File
+    File(..),
+
     -- Autoindex statements
     AutoIdxStmt(..),
 
     -- Module
-    ParamStmt(..), Constant(..),
+    Module(..), ModuleStmt(..), ModuleBody(..),
+    ModuleBodyVariant(..), ParamStmt(..), Constant(..),
 
     -- Attribute statements
     AttrStmt(..),
@@ -68,20 +72,26 @@ data Value = Value
 -- strings
 -- comments
 -- file
+data File           = File AutoIdxStmt [Module] deriving (Show)
 
 -- Autoindex statements
 data AutoIdxStmt    = AutoIdxStmt   Int     deriving (Show)
 
 -- Module
-data ParamStmt = ParamStmt
-    { paramId       :: Id
-    , paramConstant :: Maybe Constant
-    }
-    deriving (Show)
-data Constant = ConstantValue   Value
-              | ConstantInteger Int
-              | ConstantString  String
-              deriving (Show)
+data Module         = Module ModuleStmt [AttrStmt] ModuleBody deriving (Show)
+data ModuleStmt     = ModuleStmt Id deriving (Show)
+data ModuleBody     = ModuleBody [ModuleBodyVariant] deriving (Show)
+data ModuleBodyVariant  = ModuleBodyParamStmt ParamStmt
+                        | ModuleBodyWire Wire
+                        | ModuleBodyMemory Memory
+                        | ModuleBodyCell Cell
+                        | ModuleBodyProcess Process
+                        deriving (Show)
+data ParamStmt      = ParamStmt Id (Maybe Constant) deriving (Show)
+data Constant       = ConstantValue   Value
+                    | ConstantInteger Int
+                    | ConstantString  String
+                    deriving (Show)
 
 -- Attribute statements
 data AttrStmt       = AttrStmt      Id Constant deriving (Show)

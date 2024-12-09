@@ -71,3 +71,8 @@ $ rtlil-parse
    multi-clock domain circuits and their associated primitives such
    as asynchronous FIFOs, but I plan to make sure simulation of such
    circuits is possible and correct.
+
+# Lessons Learned
+ - Should have written parser to be token based where after consuming
+   and capturing token, we consume and discard all following whitespaces
+   as well as comments...
