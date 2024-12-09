@@ -51,6 +51,8 @@ import RTLILParser.Primitives(
    ,pOctal
    ,pEscapedChar
     )
+import Text.Parsec.Token (GenLanguageDef(caseSensitive))
+import GHC.IO.Handle.Types (Handle__(Handle__))
 
 -- taken from: https://yosyshq.readthedocs.io/projects/yosys/en/0.47/appendix/rtlil_text.html
 -- parsers below are split int sections from the above link
@@ -104,17 +106,17 @@ pString =
 
 -- Autoindex statements
 pAutoIdxStmt :: Parser AutoIdxStmt
-pAutoIdxStmt = AutoIdxStmt <$> (string "autoidx" *> pWs *> pInteger <* pEol)
+pAutoIdxStmt = AutoIdxStmt <$> (string "autoidx" *> pWs *> pInteger <* pEol <* pMaybeWs)
 
 -- Module
 pModuleStmt :: Parser Id
-pModuleStmt = string "module" *> pWs *> pId <* pEol
+pModuleStmt = string "module" *> pWs *> pId <* pEol <* pMaybeWs
 
 pParamStmt :: Parser ParamStmt
 pParamStmt = ParamStmt
     <$> (string "parameter" *> pWs *> pId <* pWs)
     <*> optionMaybe pConstant
-    <*  pEol
+    <*  pEol <*  pMaybeWs
 
 pConstant :: Parser Constant
 pConstant =
@@ -130,7 +132,7 @@ pAttrStmt :: Parser AttrStmt
 pAttrStmt = AttrStmt
     <$> (string "attribute" *> pWs *> pId)
     <*> (pWs *> pConstant)
-    <*  pEol
+    <*  pEol <* pMaybeWs
 
 -- Signal Specifications
 pSigSpec :: Parser SigSpec
@@ -167,7 +169,7 @@ pConnStmt :: Parser ConnStmt
 pConnStmt = ConnStmt
     <$> (string "connect" *> pWs *> pSigSpec)
     <*> (pWs *> pSigSpec)
-    <*  pEol
+    <*  pEol <* pMaybeWs
 
 -- Wires
 pWire :: Parser Wire
@@ -184,7 +186,7 @@ pWireStmt =
     <*> (WireId <$> pId)
     <*  pWs
     <*> many pWireOption
-    <*  pEol
+    <*  pEol <* pMaybeWs
 
 pWireId :: Parser WireId
 pWireId = WireId <$> pId
@@ -214,7 +216,7 @@ pMemoryStmt =
     <*> (MemoryID <$> pId)
     <*  pWs
     <*> many pMemoryOption
-    <*  pEol
+    <*  pEol <* pMaybeWs
 
 pMemoryOption :: Parser MemoryOption
 pMemoryOption =
@@ -237,7 +239,7 @@ pCellStmt = do
     cellType <- CellType <$> pId
     _ <- pWs
     cellId <- CellId <$> pId
-    _ <- pEol
+    _ <- pEol <* pMaybeWs
     return $ CellStmt cellId cellType
 
 pCellBodyStmt :: Parser CellBodyStmt
@@ -253,14 +255,14 @@ pCellBodyParameter = do
     _       <- string "parameter" <* pWs
     sign    <- optionMaybe pParameterSign <* pMaybeWs
     id      <- pId
-    const   <- pConstant <* pEol
+    const   <- pConstant <* pEol <* pMaybeWs
     return $ CellBodyParameter sign id const
 
 pCellBodyConnect :: Parser CellBodyStmt
 pCellBodyConnect = do
     _       <- string "connect" <* pWs
     id      <- pId <* pWs
-    sigSpec <- pSigSpec <* pEol
+    sigSpec <- pSigSpec <* pEol <* pMaybeWs
     return  $ CellConnect id sigSpec
 
 -- Processes
@@ -273,22 +275,62 @@ pSrcSigSpec = SrcSigSpec <$> pSigSpec
 pAssignStmt :: Parser AssignStmt
 pAssignStmt = AssignStmt
     <$> (string "assign" *> pWs *> pDestSigSpec)
-    <*> (pWs *> pSrcSigSpec <* pEol)
+    <*> (pWs *> pSrcSigSpec <* pEol <* pMaybeWs)
 
 -- Switches
+-- - [ ] <switch>            ::= <switch-stmt> <case>* <switch-end-stmt>
+-- - [ ] <switch-stmt>       ::= <attr-stmt>* switch <sigspec> <eol>
+-- - [ ] <case>              ::= <attr-stmt>* <case-stmt> <case-body>
+-- - [x] <case-stmt>         ::= case <compare>? <eol>
+-- - [x] <compare>           ::= <sigspec> (, <sigspec>)*
+-- - [ ] <case-body>         ::= (<switch> | <assign-stmt>)*
+-- - [ ] <switch-end-stmt>   ::= end <eol>
+
+pSwitch :: Parser Switch
+pSwitch = Switch
+    <$> pSwitchStmt
+    <*> (many pCase <* pSwitchEndStmt)
+
+pSwitchStmt :: Parser SwitchStmt
+pSwitchStmt = do
+    attrs   <- many pAttrStmt
+    _       <- string "switch"  <* pWs
+    sigspec <- pSigSpec <* pEol <* pMaybeWs
+    return $ SwitchStmt sigspec attrs
+
+pCase :: Parser Case
+pCase = Case
+    <$> pCaseStmt
+    <*> many pAttrStmt
+    <*> pCaseBody
+
 pCaseStmt :: Parser CaseStmt
 pCaseStmt = CaseStmt
-    <$> (string "case" *> pWs *> optionMaybe pCompare <* pEol)
+    <$> (
+        string "case" *> pWs 
+        *> optionMaybe pCompare 
+        <* pEol <* pMaybeWs)
 
 pCompare :: Parser Compare
 pCompare = Compare
-    <$> pSigSpec
-    <*> many (char ',' *> pMaybeWs *> pSigSpec)
+    <$> pSigSpec `sepBy` (pMaybeWs *> char ',' *> pMaybeWs)
+
+pCaseBody :: Parser CaseBody
+pCaseBody = CaseBody <$> many pCaseBodyVariant
+
+pCaseBodyVariant :: Parser CaseBodyVariants
+pCaseBodyVariant =
+    try (CaseBodySwitchVariant <$> pSwitch    ) <|>
+        (CaseBodyAssignVariant <$> pAssignStmt)
+
+pSwitchEndStmt :: Parser ()
+pSwitchEndStmt = void (string "end" *> pEol *> pMaybeWs)
+
 -- Syncs
 
 
 
-
+ 
 -- would correspond to `123456789[0:9][0:8]`
 exampleSigSpecSlice =
     SigSpecSlice

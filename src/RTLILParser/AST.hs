@@ -134,14 +134,14 @@ data AssignStmt     = AssignStmt  DestSigSpec SrcSigSpec
                     deriving (Show)
 
 -- Switches
-data Switch         = Switch SwitchStmt [AttrStmt] [Case]
+data Switch         = Switch SwitchStmt [Case]
                       deriving (Show)
 data SwitchStmt     = SwitchStmt SigSpec [AttrStmt] deriving (Show)
-data Case           = Case CaseStmt [AttrStmt] [AssignStmt] CaseBody
+data Case           = Case CaseStmt [AttrStmt] CaseBody
                       deriving (Show)
 data CaseStmt       = CaseStmt (Maybe Compare)
                       deriving (Show)
-data Compare        = Compare SigSpec [SigSpec]
+data Compare        = Compare [SigSpec]
                       deriving (Show)
 data CaseBodyVariants   = CaseBodySwitchVariant Switch
                         | CaseBodyAssignVariant AssignStmt
