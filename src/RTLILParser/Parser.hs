@@ -1,4 +1,8 @@
-module RTLILParser.Parser(a, val) where
+module RTLILParser.Parser(
+    preProcessDiscardComments,
+    pFile,
+    a,
+    val) where
 
 import Control.Monad (void)
 import Text.Parsec
@@ -109,6 +113,16 @@ pString =
         parseString = many (pEscapedChar <|> noneOf "\\\"")
 
 -- comments
+-- | Removes inline comments starting with '#' while preserving newlines
+preProcessDiscardComments :: String -> String
+preProcessDiscardComments input = unlines $ map stripComment $ lines input
+  where
+    -- Strips comments from a single line
+    stripComment line = case break (== '#') line of
+        (code, "")   -> code       -- No comment found
+        (code, _)    -> code       -- Strip everything after '#'
+
+
 -- file
 pFile :: Parser File
 pFile = File
