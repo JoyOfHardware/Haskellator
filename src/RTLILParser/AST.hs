@@ -31,7 +31,8 @@ module RTLILParser.AST (
     CellBodyStmt(..),
 
     -- Processes
-    DestSigSpec(..), SrcSigSpec(..), AssignStmt(..),
+    Process(..), ProcStmt(..), ProcessBody(..), AssignStmt(..),
+    DestSigSpec(..), SrcSigSpec(..),
 
     -- Switches
     Switch(..), SwitchStmt(..), Case(..), CaseStmt(..), Compare(..),
@@ -39,6 +40,8 @@ module RTLILParser.AST (
 
     -- Syncs
     Sync(..), SyncStmt(..), SyncType(..), UpdateStmt(..)
+
+
 ) where
 
 import Text.Read (Lexeme(Ident))
@@ -131,7 +134,15 @@ data CellBodyStmt   = CellBodyParameter
                     deriving (Show)
 
 -- Processes
--- data ProcessBody    = ProcessBody [AssignStmt]
+data Process        = Process ProcStmt [AttrStmt] ProcessBody
+                      deriving (Show)
+data ProcStmt       = ProcStmt Id deriving (Show)
+data ProcessBody    = ProcessBody 
+                        [AssignStmt]
+                        Switch 
+                        [AssignStmt] 
+                        [Sync] 
+                    deriving (Show)
 data AssignStmt     = AssignStmt  DestSigSpec SrcSigSpec
                       deriving (Show)
 data DestSigSpec    = DestSigSpec SigSpec  deriving (Show)

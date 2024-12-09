@@ -18,20 +18,23 @@
        readable and correctable validation errors
  - [ ] when writing simulator, must specify directions on cell ports
  - [ ] in the <process>, why are we allowed to have <assign-stmt> before
-       and after the optional <switch> stmt?
+       and after the optional <switch> stmt? If the ordering here is
+       semantically significant, then modify AST to only have single
+       `[AssignStmt]` field and update parser behavior accordingly.
  - [ ] inspect Chris's mini-RTLIL
  - [ ] add RST grammar file to repo
  - [ ] name parsers so that that we know where failures occured
  - [ ] may want to also derive equality statements
  - [x] replace both `pEol *> pMaybeWs` and `pEol <* pMaybeWs` 
        with `pEolAndAdvanceToNextNonWs`
- - [ ] Check inline sequencing of whitespace parsers in do blocks.
+ - [x] Check inline sequencing of whitespace parsers in do blocks.
        Terminating instances of `pWs` should be preceeded by `<*`
 
  # Parser Development
-  - [x] Sync
-  - [ ] Process
-  - [ ] Module
+ - [x] Sync
+ - [ ] Process
+ - [ ] Rewrite `pWireStmt` and `pMemoryStmt` using do-notation...
+ - [ ] Module
 
  # Parser Verification
  - [ ] I think only EOL terminated parsers should be responsible 
