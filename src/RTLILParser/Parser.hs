@@ -75,29 +75,33 @@ runParser str = case parse pFile "pFile" preProcessedFile of
 
 -- identifiers
 pId :: Parser Id
-pId = Public  <$> pPublicId
-  <|> Autogen <$> pAutogenId
-  <?> "Id"
+pId = p <?> name where
+    name = "Id"
+    p =
+        Public  <$> pPublicId
+        <|> Autogen <$> pAutogenId
 
 pPublicId   :: Parser PublicId
-pPublicId   = PublicId <$> (char '\\' *> many1 pNonWs)
+pPublicId   = (PublicId <$> (char '\\' *> many1 pNonWs))
     <?> "PublicId"
 
 pAutogenId  :: Parser AutogenId
-pAutogenId  = AutogenId <$> (char '$' *> many1 pNonWs)
-    <?> "AutogenId"
+pAutogenId  = (AutogenId <$> (char '$' *> many1 pNonWs))
+           <?> "AutogenId"
 
 -- values
 pValue :: Parser Value
-pValue = do
-    width <- many1 pDecimalDigit
-    char '\''
-    value <- many pBinaryDigit
-    return $ Value (read width) (binaryStringToInt value)
-    <?> "Value"
+pValue = p <?> name where
+    name = "Value"
+    p =
+        do
+        width <- many1 pDecimalDigit
+        char '\''
+        value <- many pBinaryDigit
+        return $ Value (read width) (binaryStringToInt value)
 
 pDecimalDigit :: Parser Char
-pDecimalDigit = oneOf "0123456789"
+pDecimalDigit = oneOf "0123456789" <?> "DecimalDigit"
 
 -- update in the future to support 4 state logic
 -- by converting x and z to 0 and warning about it.
@@ -105,28 +109,31 @@ pBinaryDigit :: Parser Char
 pBinaryDigit = oneOf "01" <?> "BinaryDigit"
 
 pInteger :: Parser Int
-pInteger = do
-    sign <- optionMaybe (char '-')
-    digits <- many1 pDecimalDigit
-    let value = read digits
-    return $ case sign of
-        Just _  -> -value
-        Nothing ->  value
-    <?> "Integer"
+pInteger = p <?> name where
+    name = "Integer"
+    p =
+        do
+        sign <- optionMaybe (char '-')
+        digits <- many1 pDecimalDigit
+        let value = read digits
+        return $ case sign of
+            Just _  -> -value
+            Nothing ->  value
 
 -- strings
 pString :: Parser String
-pString =
-    between delimiter delimiter parseString
-    <?> "String"
-    where
-        delimiter = char '"'
-        parseString = many (pEscapedChar <|> noneOf "\\\"")
+pString = p <?> name where
+    name = "String"
+    p =
+        between delimiter delimiter parseString
+        where
+            delimiter = char '"'
+            parseString = many (pEscapedChar <|> noneOf "\\\"")
 
 -- comments
 -- | Removes entire comment lines starting with '#' and inline comments
 preProcessDiscardComments :: String -> String
-preProcessDiscardComments input = 
+preProcessDiscardComments input =
     unlines $ map stripComment $ filter (not . isCommentLine) $ lines input
     where
       -- Checks if a line is a comment line (starts with '#')
@@ -141,41 +148,52 @@ preProcessDiscardComments input =
 
 -- file
 pFile :: Parser File
-pFile = File
-    <$> pAutoIdxStmt
-    <*> many pModule
-    <?> "File"
+pFile = p <?> name where
+    name = "File"
+    p =
+        File
+        <$> pAutoIdxStmt
+        <*> many pModule
 
 -- Autoindex statements
 pAutoIdxStmt :: Parser AutoIdxStmt
-pAutoIdxStmt = AutoIdxStmt
-    <$> (string "autoidx" *> pWs *>
-         pInteger <* pEolAndAdvanceToNextNonWs)
-    <?> "AutoIdxStmt"
+pAutoIdxStmt = p <?> name where
+    name = "AutoIdxStmt"
+    p =
+        AutoIdxStmt
+        <$> (string "autoidx" *> pWs *>
+            pInteger <* pEolAndAdvanceToNextNonWs)
 
 -- Module
 pModule :: Parser Module
-pModule = do
-    attrs       <- many pAttrStmt
-    moduleStmt  <- pModuleStmt
-    moduleBody  <- pModuleBody
-    pModuleEndStmt
-    return $ Module moduleStmt attrs moduleBody
-    <?> "Module"
+pModule = p <?> name where
+    name = "Module"
+    p =
+        do
+        attrs       <- many pAttrStmt
+        moduleStmt  <- pModuleStmt
+        moduleBody  <- pModuleBody
+        pModuleEndStmt
+        return $ Module moduleStmt attrs moduleBody
 
 pModuleStmt :: Parser ModuleStmt
-pModuleStmt = ModuleStmt 
-    <$> (string "module" *> pWs *> 
-         pId <* pEolAndAdvanceToNextNonWs)
-    <?> "ModuleStmt"
+pModuleStmt = p <?> name where
+    name = "ModuleStmt"
+    p =
+        ModuleStmt
+        <$> (string "module" *> pWs *>
+            pId <* pEolAndAdvanceToNextNonWs)
 
 pModuleBody :: Parser ModuleBody
-pModuleBody = ModuleBody
-    <$> many pModuleBodyVariant
-    <?> "ModuleBody"
+pModuleBody = p <?> name where
+    name = "ModuleBody"
+    p =
+        ModuleBody
+        <$> many pModuleBodyVariant
 
 pModuleBodyVariant :: Parser ModuleBodyVariant
-pModuleBodyVariant = 
+pModuleBodyVariant = p <?> name where
+    name = "ModuleBodyVariant"
     -- `pWire`, `pMemory`, `pCell`, `pProcess` all
     -- start by parsing attribute statements, so we
     -- need backtracking since we can't determin which
@@ -183,24 +201,26 @@ pModuleBodyVariant =
     -- we encounter alone. `pParamStmt` technically doesn't
     -- need to be prefixed by `try`, so that is a stylistic
     -- choice.
-    try (ModuleBodyParamStmt    <$> pParamStmt) <|>
-    try (ModuleBodyWire         <$> pWire     ) <|>
-    try (ModuleBodyMemory       <$> pMemory   ) <|>
-    try (ModuleBodyCell         <$> pCell     ) <|>
-        (ModuleBodyProcess      <$> pProcess  )
-    <?> "ModuleBodyVariant"
+    p =
+        try (ModuleBodyParamStmt    <$> pParamStmt) <|>
+        try (ModuleBodyWire         <$> pWire     ) <|>
+        try (ModuleBodyMemory       <$> pMemory   ) <|>
+        try (ModuleBodyCell         <$> pCell     ) <|>
+            (ModuleBodyProcess      <$> pProcess  )
 
 pParamStmt :: Parser ParamStmt
-pParamStmt = ParamStmt
-    <$> (string "parameter" *> pWs *> pId <* pWs)
-    <*> optionMaybe pConstant
-    <*  pEolAndAdvanceToNextNonWs
-    <?> "ParamStmt"
+pParamStmt = p <?> name where
+    name = "ParamStmt"
+    p =
+        ParamStmt
+        <$> (string "parameter" *> pWs *> pId <* pWs)
+        <*> optionMaybe pConstant
+        <*  pEolAndAdvanceToNextNonWs
 
 pConstant :: Parser Constant
 pConstant = p <?> name where
     name = "Constant"
-    p = 
+    p =
         try (ConstantValue      <$> pValue  )
         <|> (ConstantInteger    <$> pInteger)
         <|> (ConstantString     <$> pString )
@@ -208,14 +228,14 @@ pConstant = p <?> name where
 pModuleEndStmt :: Parser ()
 pModuleEndStmt = p <?> name where
     name = "ModuleEndStmt"
-    p = 
+    p =
         void (string "end")
 
 -- Attribute statements
 pAttrStmt :: Parser AttrStmt
 pAttrStmt = p <?> name where
     name = "AttrStmt"
-    p = 
+    p =
         AttrStmt
         <$> (string "attribute" *> pWs *> pId)
         <*> (pWs *> pConstant)
@@ -237,7 +257,7 @@ pSigSpec = p <?> name where
 pSigSpecConcat :: Parser SigSpec
 pSigSpecConcat = p <?> name where
     name = "SigSpecConcat"
-    p = 
+    p =
         do
         char '{' <* pWs
         sigspecs    <- pSigSpec `sepBy` pWs
@@ -293,13 +313,13 @@ pWireStmt = p <?> name where
 pWireId :: Parser WireId
 pWireId = p <?> name where
     name = "WireId"
-    p = 
+    p =
         WireId <$> pId
 
 pWireOption :: Parser WireOption
 pWireOption = p <?> name where
     name = "WireOption"
-    p = 
+    p =
         try (WireOptionWidth  <$> (string "width"  *> pWs *> pInteger)) <|>
         try (WireOptionOffset <$> (string "offset" *> pWs *> pInteger)) <|>
         try (WireOptionInput  <$> (string "input"  *> pWs *> pInteger)) <|>
@@ -310,189 +330,262 @@ pWireOption = p <?> name where
 
 -- Memories
 pMemory :: Parser Memory
-pMemory = do
-    attrs <- many pAttrStmt
-    memoryStmt <- pMemoryStmt
-    return $ Memory memoryStmt attrs
+pMemory = p <?> name where
+    name = "Memory"
+    p =
+        do
+        attrs <- many pAttrStmt
+        memoryStmt <- pMemoryStmt
+        return $ Memory memoryStmt attrs
 
 pMemoryStmt :: Parser MemoryStmt
-pMemoryStmt = do
-    (string "memory" <* pWs)
-    options     <- (many pMemoryOption <* pWs)
-    memoryId    <- MemoryID <$> pId
-    pEolAndAdvanceToNextNonWs
-    return $ MemoryStmt memoryId options
+pMemoryStmt = p <?> name where
+    name = "MemoryStmt"
+    p =
+        do
+        (string "memory" <* pWs)
+        options     <- (many pMemoryOption <* pWs)
+        memoryId    <- MemoryID <$> pId
+        pEolAndAdvanceToNextNonWs
+        return $ MemoryStmt memoryId options
 
 pMemoryOption :: Parser MemoryOption
-pMemoryOption =
-    try (MemoryOptionWidth  <$> (string "width"  *> pWs *> pInteger)) <|>
-    try (MemoryOptionSize   <$> (string "size"   *> pWs *> pInteger)) <|>
-    try (MemoryOptionOffset <$> (string "offset" *> pWs *> pInteger))
+pMemoryOption = p <?> name where
+    name = "MemoryOption"
+    p =
+        try (MemoryOptionWidth  <$> (string "width"  *> pWs *> pInteger)) <|>
+        try (MemoryOptionSize   <$> (string "size"   *> pWs *> pInteger)) <|>
+        try (MemoryOptionOffset <$> (string "offset" *> pWs *> pInteger))
 
 -- Cells
 pCell :: Parser Cell
-pCell = do
-    attrStmts       <- many pAttrStmt
-    cellStmt        <- pCellStmt
-    cellBodyStmts   <- many pCellBodyStmt <* pCellEndStmt
-    return $ Cell cellStmt attrStmts cellBodyStmts
+pCell = p <?> name where
+    name = "Cell"
+    p =
+        do
+        attrStmts       <- many pAttrStmt
+        cellStmt        <- pCellStmt
+        cellBodyStmts   <- many pCellBodyStmt <* pCellEndStmt
+        return $ Cell cellStmt attrStmts cellBodyStmts
 
 pCellStmt :: Parser CellStmt
-pCellStmt = do
-    string "cell"
-    pWs
-    cellType <- CellType <$> pId
-    pWs
-    cellId <- CellId <$> pId
-    pEolAndAdvanceToNextNonWs
-    return $ CellStmt cellId cellType
+pCellStmt = p <?> name where
+    name = "CellStmt"
+    p =
+        do
+        string "cell"
+        pWs
+        cellType <- CellType <$> pId
+        pWs
+        cellId <- CellId <$> pId
+        pEolAndAdvanceToNextNonWs
+        return $ CellStmt cellId cellType
 
 pCellBodyStmt :: Parser CellBodyStmt
-pCellBodyStmt = pCellBodyParameter <|> pCellBodyConnect
+pCellBodyStmt = p <?> name where
+    name = "CellBodyStmt"
+    p =
+        pCellBodyParameter <|> pCellBodyConnect
 
 pParameterSign :: Parser ParameterSign
-pParameterSign =
-    (Signed     <$ string "signed") <|>
-    (Real       <$ string "real")
+pParameterSign = p <?> name where
+    name = "ParameterSign"
+    p =
+        (Signed     <$ string "signed") <|>
+        (Real       <$ string "real")
 
 pCellBodyParameter :: Parser CellBodyStmt
-pCellBodyParameter = do
-    string "parameter" <* pWs
-    sign    <- optionMaybe pParameterSign <* pMaybeWs
-    id      <- pId
-    const   <- pConstant <* pEolAndAdvanceToNextNonWs
-    return $ CellBodyParameter sign id const
+pCellBodyParameter = p <?> name where
+    name = "CellBodyParameter"
+    p =
+        do
+        string "parameter" <* pWs
+        sign    <- optionMaybe pParameterSign <* pMaybeWs
+        id      <- pId
+        const   <- pConstant <* pEolAndAdvanceToNextNonWs
+        return $ CellBodyParameter sign id const
 
 pCellBodyConnect :: Parser CellBodyStmt
-pCellBodyConnect = do
-    string "connect" <* pWs
-    id      <- pId <* pWs
-    sigSpec <- pSigSpec <* pEolAndAdvanceToNextNonWs
-    return  $ CellConnect id sigSpec
+pCellBodyConnect = p <?> name where
+    name = "CellBodyConnect"
+    p =
+        do
+        string "connect" <* pWs
+        id      <- pId <* pWs
+        sigSpec <- pSigSpec <* pEolAndAdvanceToNextNonWs
+        return  $ CellConnect id sigSpec
 
 pCellEndStmt :: Parser ()
 pCellEndStmt = void (string "end" <* pEolAndAdvanceToNextNonWs)
+            <?> "CellEndStmt"
 
 -- Processes
 pProcess :: Parser Process
-pProcess = do
-    attrs       <- many pAttrStmt
-    procStmt    <- pProcStmt
-    processBody <- pProcessBody
-    pProcEndStmt
-    return $ Process procStmt attrs processBody
+pProcess = p <?> name where
+    name = "Process"
+    p =
+        do
+        attrs       <- many pAttrStmt
+        procStmt    <- pProcStmt
+        processBody <- pProcessBody
+        pProcEndStmt
+        return $ Process procStmt attrs processBody
 
 pProcStmt :: Parser ProcStmt
-pProcStmt = ProcStmt
-    <$> (string "process" *> pWs *> pId)
-    <*  pEolAndAdvanceToNextNonWs
+pProcStmt = p <?> name where
+    name = "ProcStmt"
+    p =
+        ProcStmt
+        <$> (string "process" *> pWs *> pId)
+        <*  pEolAndAdvanceToNextNonWs
 
 pProcessBody :: Parser ProcessBody
-pProcessBody = do
-    -- Since the pAssignStmt parser begins with "assign" and the pSwitch
-    -- parser technically begins with "attribute", these both starting
-    -- with the character 'a', we need to be able to rewind failed
-    -- attempts for `pAssignStmt` and `pSwitch` parsers as the first
-    -- character being an 'a' would have been consumed.
-    assignStmtsBefore   <- many $ try pAssignStmt
-    switch              <- optionMaybe $ try pSwitch
-    assignStmtsAfter    <- many pAssignStmt
-    syncs               <- many pSync
-    return $ ProcessBody assignStmtsBefore switch assignStmtsAfter syncs
+pProcessBody = p <?> name where
+    name = "ProcessBody"
+    p =
+        do
+        -- Since the pAssignStmt parser begins with "assign" and the pSwitch
+        -- parser technically begins with "attribute", these both starting
+        -- with the character 'a', we need to be able to rewind failed
+        -- attempts for `pAssignStmt` and `pSwitch` parsers as the first
+        -- character being an 'a' would have been consumed.
+        assignStmtsBefore   <- many $ try pAssignStmt
+        switch              <- optionMaybe $ try pSwitch
+        assignStmtsAfter    <- many pAssignStmt
+        syncs               <- many pSync
+        return $ ProcessBody assignStmtsBefore switch assignStmtsAfter syncs
 
 pAssignStmt :: Parser AssignStmt
-pAssignStmt = AssignStmt
-    <$> (string "assign" *> pWs *> pDestSigSpec)
-    <*> (pWs *> pSrcSigSpec <* pEolAndAdvanceToNextNonWs)
+pAssignStmt = p <?> name where
+    name = "AssignStmt"
+    p =
+        AssignStmt
+        <$> (string "assign" *> pWs *> pDestSigSpec)
+        <*> (pWs *> pSrcSigSpec <* pEolAndAdvanceToNextNonWs)
 
 pDestSigSpec :: Parser DestSigSpec
-pDestSigSpec = DestSigSpec <$> pSigSpec
+pDestSigSpec = (DestSigSpec <$> pSigSpec) <?> "DestSigSpec"
 
 pSrcSigSpec :: Parser SrcSigSpec
-pSrcSigSpec = SrcSigSpec <$> pSigSpec
+pSrcSigSpec = (SrcSigSpec <$> pSigSpec) <?> "SrcSigSpec"
 
 pProcEndStmt :: Parser ()
 pProcEndStmt = void (string "end" <* pEolAndAdvanceToNextNonWs)
+            <?> "ProcEndStmt"
 
 -- Switches
 pSwitch :: Parser Switch
-pSwitch = Switch
-    <$> pSwitchStmt
-    <*> (many pCase <* pSwitchEndStmt)
+pSwitch = p <?> name where
+    name = "Switch"
+    p = 
+        Switch
+        <$> pSwitchStmt
+        <*> (many pCase <* pSwitchEndStmt)
 
 pSwitchStmt :: Parser SwitchStmt
-pSwitchStmt = do
-    attrs   <- many pAttrStmt
-    string "switch"  <* pWs
-    sigspec <- pSigSpec <* pEolAndAdvanceToNextNonWs
-    return $ SwitchStmt sigspec attrs
+pSwitchStmt =  p <?> name where
+    name = "SwitchStmt"
+    p = 
+        do
+        attrs   <- many pAttrStmt
+        string "switch"  <* pWs
+        sigspec <- pSigSpec <* pEolAndAdvanceToNextNonWs
+        return $ SwitchStmt sigspec attrs
 
 pCase :: Parser Case
-pCase = Case
-    <$> pCaseStmt
-    <*> many pAttrStmt
-    <*> pCaseBody
+pCase = p <?> name where
+    name = "Case"
+    p =
+        Case
+        <$> pCaseStmt
+        <*> many pAttrStmt
+        <*> pCaseBody
 
 pCaseStmt :: Parser CaseStmt
-pCaseStmt = CaseStmt
-    <$> (
-        string "case" *> pWs
-        *> optionMaybe pCompare
-        <* pEolAndAdvanceToNextNonWs)
+pCaseStmt = p <?> name where
+    name = "CaseStmt"
+    p = 
+        CaseStmt
+        <$> (
+            string "case" *> pWs
+            *> optionMaybe pCompare
+            <* pEolAndAdvanceToNextNonWs)
 
 pCompare :: Parser Compare
-pCompare = Compare
-    <$> pSigSpec `sepBy` (pMaybeWs *> char ',' *> pMaybeWs)
+pCompare = p <?> name where
+    name = "Compare"
+    p = 
+        Compare
+        <$> pSigSpec `sepBy` (pMaybeWs *> char ',' *> pMaybeWs)
 
 pCaseBody :: Parser CaseBody
-pCaseBody = CaseBody <$> many pCaseBodyVariant
+pCaseBody = (CaseBody <$> many pCaseBodyVariant) <?> "CaseBody"
 
 pCaseBodyVariant :: Parser CaseBodyVariants
-pCaseBodyVariant =
-    try (CaseBodySwitchVariant <$> pSwitch    ) <|>
-        (CaseBodyAssignVariant <$> pAssignStmt)
+pCaseBodyVariant = p <?> name where
+    name = "CaseBodyVariant"
+    p = 
+        try (CaseBodySwitchVariant <$> pSwitch    ) <|>
+            (CaseBodyAssignVariant <$> pAssignStmt)
 
 pSwitchEndStmt :: Parser ()
-pSwitchEndStmt = void (string "end" *> pEolAndAdvanceToNextNonWs)
+pSwitchEndStmt = void (string "end" *> pEolAndAdvanceToNextNonWs) 
+              <?> "SwitchEndStmt"
 
 -- Syncs
 pSync :: Parser Sync
-pSync = Sync
-    <$> pSyncStmt
-    <*> many pUpdateStmt
+pSync = p <?> name where
+    name = "Sync"
+    p = 
+        Sync
+        <$> pSyncStmt
+        <*> many pUpdateStmt
 
 pSyncStmt :: Parser SyncStmt
-pSyncStmt =  pKeywordSync *>
-                pSigSpecPredicatedSyncStmt <|>
-                pNonSigSpecPredicatedSyncStmt
-                where pKeywordSync = string "sync" *> pWs
+pSyncStmt =  p <?> name where
+    name = "SyncStmt"
+    p = 
+        pKeywordSync *>
+                    pSigSpecPredicatedSyncStmt <|>
+                    pNonSigSpecPredicatedSyncStmt
+                    where pKeywordSync = string "sync" *> pWs
 
 pSigSpecPredicatedSyncStmt :: Parser SyncStmt
-pSigSpecPredicatedSyncStmt = do
-    syncType    <-  pSyncType <* pWs
-    sigSpec     <-  pSigSpec  <* pEolAndAdvanceToNextNonWs
-    return $ SigSpecPredicated sigSpec syncType
+pSigSpecPredicatedSyncStmt = p <?> name where
+    name = "SigSpecPredicatedSyncStmt"
+    p = 
+        do
+        syncType    <-  pSyncType <* pWs
+        sigSpec     <-  pSigSpec  <* pEolAndAdvanceToNextNonWs
+        return $ SigSpecPredicated sigSpec syncType
 
 pNonSigSpecPredicatedSyncStmt :: Parser SyncStmt
-pNonSigSpecPredicatedSyncStmt =
-    keyword <* pEolAndAdvanceToNextNonWs
-    where keyword =
-            (Global <$ string "global"  ) <|>
-            (Init   <$ string "init"    ) <|>
-            (Always <$ string "always"  )
+pNonSigSpecPredicatedSyncStmt = p <?> name where
+    name = "NonSigSpecPredicatedSyncStmt"
+    p = 
+        keyword <* pEolAndAdvanceToNextNonWs
+        where keyword =
+                (Global <$ string "global"  ) <|>
+                (Init   <$ string "init"    ) <|>
+                (Always <$ string "always"  )
 
 pSyncType :: Parser SyncType
-pSyncType =
-    (Low        <$ string "low"     )   <|>
-    (High       <$ string "high"    )   <|>
-    (Posedge    <$ string "posedge" )   <|>
-    (Negedge    <$ string "negedge" )   <|>
-    (Edge       <$ string "edge"    )
+pSyncType = p <?> name where
+    name = "SyncType"
+    p =
+        (Low        <$ string "low"     )   <|>
+        (High       <$ string "high"    )   <|>
+        (Posedge    <$ string "posedge" )   <|>
+        (Negedge    <$ string "negedge" )   <|>
+        (Edge       <$ string "edge"    )
 
 pUpdateStmt :: Parser UpdateStmt
-pUpdateStmt = UpdateStmt
-    <$> (string "update" *> pWs *> pDestSigSpec)
-    <*> (pWs *> pSrcSigSpec <* pEolAndAdvanceToNextNonWs)
+pUpdateStmt = p <?> name where
+    name = "UpdateStmt"
+    p = 
+        UpdateStmt
+        <$> (string "update" *> pWs *> pDestSigSpec)
+        <*> (pWs *> pSrcSigSpec <* pEolAndAdvanceToNextNonWs)
 
 -- would correspond to `123456789[0:9][0:8]`
 exampleSigSpecSlice =
