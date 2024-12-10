@@ -5,7 +5,7 @@ module RTLILParser.Primitives(
    ,pEol
    ,pOctal
    ,pEscapedChar
-   ,pEolAndAdvanceToNextNonWs
+   ,advanceToNextToken
 ) where
 
 import Control.Monad (void)
@@ -28,8 +28,8 @@ pEscapedChar = do
     choice
         [ char 'n' >> return '\n'
         , char 't' >> return '\t'
-        , try pOctal             
-        , anyChar                
+        , try pOctal
+        , anyChar
         ]
 
 pMaybeWs :: Parser String
@@ -42,8 +42,17 @@ pWs = many1 (oneOf " \t")
 pNonWs :: Parser Char
 pNonWs = noneOf " \t\r\n"
 
-pEol :: Parser String
-pEol = many1 (oneOf "\r\n")
+pEol :: Parser ()
+pEol = void (many1 (oneOf "\r\n") <* pMaybeWs)
 
-pEolAndAdvanceToNextNonWs :: Parser ()
-pEolAndAdvanceToNextNonWs = void $ pEol *> pMaybeWs
+-- a comment begins with # and ends at the end of the line
+-- a comment can be be inline, but must still end at the end of the line
+pComment :: Parser String
+pComment = do
+  char '#'
+  comment <- many (noneOf "\r\n")
+  pEol
+  return comment
+
+advanceToNextToken :: Parser ()
+advanceToNextToken = void (pMaybeWs *> many1 (void pComment <|> pEol))

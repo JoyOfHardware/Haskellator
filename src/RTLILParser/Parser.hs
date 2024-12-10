@@ -1,5 +1,4 @@
 module RTLILParser.Parser(
-    preProcessDiscardComments,
     RTLILParser.Parser.runParser,
     a,
     val) where
@@ -62,16 +61,17 @@ import RTLILParser.Primitives(
    ,pEol
    ,pOctal
    ,pEscapedChar
-   ,pEolAndAdvanceToNextNonWs
+   ,advanceToNextToken
     )
 
 -- taken from: https://yosyshq.readthedocs.io/projects/yosys/en/0.47/appendix/rtlil_text.html
 -- parsers below are split int sections from the above link
 
 runParser str = case parse pFile "pFile" preProcessedFile of
+-- runParser str = case parse pCell "pCell" preProcessedFile of
     Left err -> error $ show err
     Right val -> val
-    where preProcessedFile = preProcessDiscardComments str
+    where preProcessedFile = str
 
 -- identifiers
 pId :: Parser Id
@@ -130,29 +130,13 @@ pString = p <?> name where
             delimiter = char '"'
             parseString = many (pEscapedChar <|> noneOf "\\\"")
 
--- comments
--- | Removes entire comment lines starting with '#' and inline comments
-preProcessDiscardComments :: String -> String
-preProcessDiscardComments input =
-    unlines $ map stripComment $ filter (not . isCommentLine) $ lines input
-    where
-      -- Checks if a line is a comment line (starts with '#')
-      isCommentLine line = case dropWhile (== ' ') line of
-          ('#':_) -> True   -- Line starts with '#'
-          _       -> False  -- Line does not start with '#'
-
-      -- Strips inline comments from a single line
-      stripComment line = case break (== '#') line of
-          (code, "") -> code    -- No comment found
-          (code, _)  -> code    -- Strip everything after '#'
-
 -- file
 pFile :: Parser File
 pFile = p <?> name where
     name = "File"
     p =
         File
-        <$> pAutoIdxStmt
+        <$> (advanceToNextToken *> pAutoIdxStmt)
         <*> many pModule
 
 -- Autoindex statements
@@ -162,7 +146,7 @@ pAutoIdxStmt = p <?> name where
     p =
         AutoIdxStmt
         <$> (string "autoidx" *> pWs *>
-            pInteger <* pEolAndAdvanceToNextNonWs)
+            pInteger <* advanceToNextToken)
 
 -- Module
 pModule :: Parser Module
@@ -174,6 +158,7 @@ pModule = p <?> name where
         moduleStmt  <- pModuleStmt
         moduleBody  <- pModuleBody
         pModuleEndStmt
+        -- return $ Module moduleStmt attrs $ModuleBody []
         return $ Module moduleStmt attrs moduleBody
 
 pModuleStmt :: Parser ModuleStmt
@@ -182,7 +167,7 @@ pModuleStmt = p <?> name where
     p =
         ModuleStmt
         <$> (string "module" *> pWs *>
-            pId <* pEolAndAdvanceToNextNonWs)
+            pId <* advanceToNextToken)
 
 pModuleBody :: Parser ModuleBody
 pModuleBody = p <?> name where
@@ -206,7 +191,7 @@ pModuleBodyVariant = p <?> name where
         try (ModuleBodyWire         <$> pWire     ) <|>
         try (ModuleBodyMemory       <$> pMemory   ) <|>
         try (ModuleBodyCell         <$> pCell     ) <|>
-            (ModuleBodyProcess      <$> pProcess  )
+        try (ModuleBodyProcess      <$> pProcess  )
 
 pParamStmt :: Parser ParamStmt
 pParamStmt = p <?> name where
@@ -215,7 +200,7 @@ pParamStmt = p <?> name where
         ParamStmt
         <$> (string "parameter" *> pWs *> pId <* pWs)
         <*> optionMaybe pConstant
-        <*  pEolAndAdvanceToNextNonWs
+        <*  advanceToNextToken
 
 pConstant :: Parser Constant
 pConstant = p <?> name where
@@ -239,7 +224,7 @@ pAttrStmt = p <?> name where
         AttrStmt
         <$> (string "attribute" *> pWs *> pId)
         <*> (pWs *> pConstant)
-        <*  pEolAndAdvanceToNextNonWs
+        <*  advanceToNextToken
 
 -- Signal Specifications
 pSigSpec :: Parser SigSpec
@@ -269,7 +254,7 @@ applySlices base = p <?> name where
     name = "ApplySlices"
     p =
         do
-        maybeSlice <- optionMaybe pSlice
+        maybeSlice <- optionMaybe $ try pSlice
         case maybeSlice of
             Nothing -> return base
             Just slice -> applySlices (SigSpecSlice base slice)
@@ -279,7 +264,7 @@ pSlice = p <?> name where
     name = "Slice"
     p =
         Slice
-        <$> (pMaybeWs *> char '[' *> pMaybeWs *> pInteger <* pMaybeWs)
+        <$> (pWs *> char '[' *> pMaybeWs *> pInteger <* pMaybeWs)
         <*> (optionMaybe (char ':' *> pInteger) <* pMaybeWs <* char ']')
 
 -- Connections
@@ -290,7 +275,7 @@ pConnStmt = p <?> name where
         ConnStmt
         <$> (string "connect" *> pWs *> pSigSpec)
         <*> (pWs *> pSigSpec)
-        <*  pEolAndAdvanceToNextNonWs
+        <*  advanceToNextToken
 
 -- Wires
 pWire :: Parser Wire
@@ -306,8 +291,8 @@ pWireStmt = p <?> name where
     name = "WireStmt"
     p = do
         string "wire" <* pWs
-        options <- many pWireOption <* pWs
-        wireId  <- WireId <$> pId <* pEolAndAdvanceToNextNonWs
+        options <- many (pWireOption <* pWs)
+        wireId  <- WireId <$> pId <* advanceToNextToken
         return $ WireStmt wireId options
 
 pWireId :: Parser WireId
@@ -325,8 +310,8 @@ pWireOption = p <?> name where
         try (WireOptionInput  <$> (string "input"  *> pWs *> pInteger)) <|>
         try (WireOptionOutput <$> (string "output" *> pWs *> pInteger)) <|>
         try (WireOptionInout  <$> (string "inout"  *> pWs *> pInteger)) <|>
-        (string "upto"      *> return WireOptionUpto)                   <|>
-        (string "signed"    *> return WireOptionSigned)
+        try (string "upto"      *> return WireOptionUpto)               <|>
+        try (string "signed"    *> return WireOptionSigned)
 
 -- Memories
 pMemory :: Parser Memory
@@ -346,7 +331,7 @@ pMemoryStmt = p <?> name where
         (string "memory" <* pWs)
         options     <- (many pMemoryOption <* pWs)
         memoryId    <- MemoryID <$> pId
-        pEolAndAdvanceToNextNonWs
+        advanceToNextToken
         return $ MemoryStmt memoryId options
 
 pMemoryOption :: Parser MemoryOption
@@ -378,7 +363,7 @@ pCellStmt = p <?> name where
         cellType <- CellType <$> pId
         pWs
         cellId <- CellId <$> pId
-        pEolAndAdvanceToNextNonWs
+        advanceToNextToken
         return $ CellStmt cellId cellType
 
 pCellBodyStmt :: Parser CellBodyStmt
@@ -400,9 +385,10 @@ pCellBodyParameter = p <?> name where
     p =
         do
         string "parameter" <* pWs
-        sign    <- optionMaybe pParameterSign <* pMaybeWs
-        id      <- pId
-        const   <- pConstant <* pEolAndAdvanceToNextNonWs
+        sign    <- optionMaybe pParameterSign
+        pMaybeWs
+        id      <- pId <* pWs
+        const   <- pConstant <* advanceToNextToken
         return $ CellBodyParameter sign id const
 
 pCellBodyConnect :: Parser CellBodyStmt
@@ -412,11 +398,11 @@ pCellBodyConnect = p <?> name where
         do
         string "connect" <* pWs
         id      <- pId <* pWs
-        sigSpec <- pSigSpec <* pEolAndAdvanceToNextNonWs
+        sigSpec <- pSigSpec <* advanceToNextToken
         return  $ CellConnect id sigSpec
 
 pCellEndStmt :: Parser ()
-pCellEndStmt = void (string "end" <* pEolAndAdvanceToNextNonWs)
+pCellEndStmt = void (string "end" <* advanceToNextToken)
             <?> "CellEndStmt"
 
 -- Processes
@@ -437,7 +423,7 @@ pProcStmt = p <?> name where
     p =
         ProcStmt
         <$> (string "process" *> pWs *> pId)
-        <*  pEolAndAdvanceToNextNonWs
+        <*  advanceToNextToken
 
 pProcessBody :: Parser ProcessBody
 pProcessBody = p <?> name where
@@ -461,7 +447,7 @@ pAssignStmt = p <?> name where
     p =
         AssignStmt
         <$> (string "assign" *> pWs *> pDestSigSpec)
-        <*> (pWs *> pSrcSigSpec <* pEolAndAdvanceToNextNonWs)
+        <*> (pWs *> pSrcSigSpec <* advanceToNextToken)
 
 pDestSigSpec :: Parser DestSigSpec
 pDestSigSpec = (DestSigSpec <$> pSigSpec) <?> "DestSigSpec"
@@ -470,51 +456,53 @@ pSrcSigSpec :: Parser SrcSigSpec
 pSrcSigSpec = (SrcSigSpec <$> pSigSpec) <?> "SrcSigSpec"
 
 pProcEndStmt :: Parser ()
-pProcEndStmt = void (string "end" <* pEolAndAdvanceToNextNonWs)
+pProcEndStmt = void (string "end" <* advanceToNextToken)
             <?> "ProcEndStmt"
 
 -- Switches
 pSwitch :: Parser Switch
 pSwitch = p <?> name where
     name = "Switch"
-    p = 
+    p =
         Switch
         <$> pSwitchStmt
-        <*> (many pCase <* pSwitchEndStmt)
+        <*> many pCase <* pSwitchEndStmt
 
 pSwitchStmt :: Parser SwitchStmt
 pSwitchStmt =  p <?> name where
     name = "SwitchStmt"
-    p = 
+    p =
         do
         attrs   <- many pAttrStmt
         string "switch"  <* pWs
-        sigspec <- pSigSpec <* pEolAndAdvanceToNextNonWs
+        sigspec <- pSigSpec <* advanceToNextToken
         return $ SwitchStmt sigspec attrs
 
 pCase :: Parser Case
 pCase = p <?> name where
     name = "Case"
     p =
-        Case
-        <$> pCaseStmt
-        <*> many pAttrStmt
-        <*> pCaseBody
+        do
+        attrs <- many pAttrStmt
+        caseStmt <- pCaseStmt
+        caseBody <- pCaseBody
+        return $ Case caseStmt attrs caseBody
+        -- return $ Case (CaseStmt Nothing) attrs (CaseBody [])
 
 pCaseStmt :: Parser CaseStmt
 pCaseStmt = p <?> name where
     name = "CaseStmt"
-    p = 
+    p =
         CaseStmt
         <$> (
             string "case" *> pWs
             *> optionMaybe pCompare
-            <* pEolAndAdvanceToNextNonWs)
+            <* advanceToNextToken)
 
 pCompare :: Parser Compare
 pCompare = p <?> name where
     name = "Compare"
-    p = 
+    p =
         Compare
         <$> pSigSpec `sepBy` (pMaybeWs *> char ',' *> pMaybeWs)
 
@@ -524,19 +512,19 @@ pCaseBody = (CaseBody <$> many pCaseBodyVariant) <?> "CaseBody"
 pCaseBodyVariant :: Parser CaseBodyVariants
 pCaseBodyVariant = p <?> name where
     name = "CaseBodyVariant"
-    p = 
+    p =
         try (CaseBodySwitchVariant <$> pSwitch    ) <|>
-            (CaseBodyAssignVariant <$> pAssignStmt)
+        try (CaseBodyAssignVariant <$> pAssignStmt)
 
 pSwitchEndStmt :: Parser ()
-pSwitchEndStmt = void (string "end" *> pEolAndAdvanceToNextNonWs) 
+pSwitchEndStmt = void (string "end" *> advanceToNextToken)
               <?> "SwitchEndStmt"
 
 -- Syncs
 pSync :: Parser Sync
 pSync = p <?> name where
     name = "Sync"
-    p = 
+    p =
         Sync
         <$> pSyncStmt
         <*> many pUpdateStmt
@@ -544,7 +532,7 @@ pSync = p <?> name where
 pSyncStmt :: Parser SyncStmt
 pSyncStmt =  p <?> name where
     name = "SyncStmt"
-    p = 
+    p =
         pKeywordSync *>
                     pSigSpecPredicatedSyncStmt <|>
                     pNonSigSpecPredicatedSyncStmt
@@ -553,17 +541,17 @@ pSyncStmt =  p <?> name where
 pSigSpecPredicatedSyncStmt :: Parser SyncStmt
 pSigSpecPredicatedSyncStmt = p <?> name where
     name = "SigSpecPredicatedSyncStmt"
-    p = 
+    p =
         do
         syncType    <-  pSyncType <* pWs
-        sigSpec     <-  pSigSpec  <* pEolAndAdvanceToNextNonWs
+        sigSpec     <-  pSigSpec  <* advanceToNextToken
         return $ SigSpecPredicated sigSpec syncType
 
 pNonSigSpecPredicatedSyncStmt :: Parser SyncStmt
 pNonSigSpecPredicatedSyncStmt = p <?> name where
     name = "NonSigSpecPredicatedSyncStmt"
-    p = 
-        keyword <* pEolAndAdvanceToNextNonWs
+    p =
+        keyword <* advanceToNextToken
         where keyword =
                 (Global <$ string "global"  ) <|>
                 (Init   <$ string "init"    ) <|>
@@ -582,10 +570,10 @@ pSyncType = p <?> name where
 pUpdateStmt :: Parser UpdateStmt
 pUpdateStmt = p <?> name where
     name = "UpdateStmt"
-    p = 
+    p =
         UpdateStmt
         <$> (string "update" *> pWs *> pDestSigSpec)
-        <*> (pWs *> pSrcSigSpec <* pEolAndAdvanceToNextNonWs)
+        <*> (pWs *> pSrcSigSpec <* advanceToNextToken)
 
 -- would correspond to `123456789[0:9][0:8]`
 exampleSigSpecSlice =

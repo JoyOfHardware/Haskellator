@@ -43,6 +43,7 @@
  - [ ] Module
  - [ ] Remove weird GHC imports
  - [ ] Embed locs in AST
+ - [ ] Scrap `pEolAndAdvanceToNextNonWs` and use `tok`
  - [ ] Remove `preProcessDiscardComments` from exports
  - [x] Are the `try` statements in `pWireOption` correctly constructed?
  - [ ] Consider the very weird case where the process body has nothing,
