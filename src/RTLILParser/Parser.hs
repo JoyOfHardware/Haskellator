@@ -67,11 +67,9 @@ import RTLILParser.Primitives(
 -- taken from: https://yosyshq.readthedocs.io/projects/yosys/en/0.47/appendix/rtlil_text.html
 -- parsers below are split int sections from the above link
 
-runParser str = case parse pFile "pFile" preProcessedFile of
--- runParser str = case parse pCell "pCell" preProcessedFile of
+runParser str = case parse pFile "pFile" str of
     Left err -> error $ show err
     Right val -> val
-    where preProcessedFile = str
 
 -- identifiers
 pId :: Parser Id
@@ -305,6 +303,8 @@ pWireOption :: Parser WireOption
 pWireOption = p <?> name where
     name = "WireOption"
     p =
+        -- We technically don't need the first `try` below so this is a
+        -- stylistic choice. The other `try` statements are needed.
         try (WireOptionWidth  <$> (string "width"  *> pWs *> pInteger)) <|>
         try (WireOptionOffset <$> (string "offset" *> pWs *> pInteger)) <|>
         try (WireOptionInput  <$> (string "input"  *> pWs *> pInteger)) <|>
