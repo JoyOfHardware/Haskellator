@@ -34,17 +34,17 @@ pEscapedChar = do
         ]
 
 pMaybeWs :: Parser String
-pMaybeWs = many (oneOf " \t")
+pMaybeWs = many (oneOf " \t") <?> "MaybeWs"
 
 pWs :: Parser String
-pWs = many1 (oneOf " \t")
+pWs = many1 (oneOf " \t") <?> "Ws"
 
 -- https://github.com/YosysHQ/yosys/blob/111b747d2797238eadf541879848492a9d34909a/frontends/rtlil/rtlil_lexer.l#L88C1-L88C17
 pNonWs :: Parser Char
-pNonWs = noneOf " \t\r\n"
+pNonWs = noneOf " \t\r\n" <?> "NonWs"
 
 pEol :: Parser ()
-pEol = void (many1 (oneOf "\r\n") <* pMaybeWs)
+pEol = void (oneOf "\r\n") <?> "Eol"
 
 -- a comment begins with # and ends at the end of the line
 -- a comment can be be inline, but must still end at the end of the line
@@ -60,12 +60,12 @@ pComment = p <?> name where
 
 advanceToNextToken :: Parser ()
 advanceToNextToken = p <?> name where
-    name = "AdvanceToNextToken" 
-    p = 
-        void (pMaybeWs *> many1 (void pComment <|> pEol))
+    name = "AdvanceToNextToken"
+    p =
+        void (pMaybeWs *> many1 (void pComment <|> (pEol <* pMaybeWs)))
 
 advanceToFirstToken :: Parser ()
 advanceToFirstToken = p <?> name where
     name = "AdvanceToFirstToken"
-    p = 
-        void (pMaybeWs *> many (void pComment <|> pEol))
+    p =
+        void (pMaybeWs *> many (void pComment <|> (pEol <* pMaybeWs)))

@@ -27,6 +27,10 @@
  - [ ] Embed locs in AST
  - [ ] Name new parsers
  - [ ] Remove `a` and `val` from exports
+ - [ ] Permit all binary characters. Add validation pass later.
+ - [ ] Correct comment parser
+ - [ ] What does it mean to have an empty sigspec concat in
+       `{ <sigspec>* }`
 
 # Parser Verification
  - [ ] I think only EOL terminated parsers should be responsible 

@@ -18,7 +18,7 @@ main = do
             -- Attempt to read the file
             contents <- catch (readFile filePath) handleReadError
             putStrLn "File Contents:"
-            putStrLn $ ppShow $ Haskellator.runParser contents
+            putStrLn $ ppShow $ Haskellator.runParser contents filePath
         [] -> putStrLn "cabal run Haskellator -- <file-path>"
     -- putStrLn $ ppShow Haskellator.val
 

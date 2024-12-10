@@ -68,7 +68,8 @@ import RTLILParser.Primitives(
 -- taken from: https://yosyshq.readthedocs.io/projects/yosys/en/0.47/appendix/rtlil_text.html
 -- parsers below are split int sections from the above link
 
-runParser str = case parse pFile "pFile" str of
+runParser :: String -> SourceName -> File
+runParser str filename = case parse pFile filename str of
     Left err -> error $ show err
     Right val -> val
 
@@ -96,16 +97,17 @@ pValue = p <?> name where
         do
         width <- many1 pDecimalDigit
         char '\''
-        value <- many pBinaryDigit
-        return $ Value (read width) (binaryStringToInt value)
+        binaryValue <- many pBinaryDigit
+        return $ Value (read width) binaryValue
 
 pDecimalDigit :: Parser Char
 pDecimalDigit = oneOf "0123456789" <?> "DecimalDigit"
 
--- update in the future to support 4 state logic
--- by converting x and z to 0 and warning about it.
+-- Haskellator simulation will likely only support 0/1 and 
+-- don't cares. We can however be permissive when parsing, 
+-- and raise errors later during validation.
 pBinaryDigit :: Parser Char
-pBinaryDigit = oneOf "01" <?> "BinaryDigit"
+pBinaryDigit = oneOf "01xzm-" <?> "BinaryDigit"
 
 pInteger :: Parser Int
 pInteger = p <?> name where
@@ -153,7 +155,7 @@ pModule = p <?> name where
     name = "Module"
     p =
         do
-        attrs       <- many pAttrStmt
+        attrs       <- many (try pAttrStmt)
         moduleStmt  <- pModuleStmt
         moduleBody  <- pModuleBody
         pModuleEndStmt
@@ -173,7 +175,7 @@ pModuleBody = p <?> name where
     name = "ModuleBody"
     p =
         ModuleBody
-        <$> many pModuleBodyVariant
+        <$> many (try pModuleBodyVariant)
 
 pModuleBodyVariant :: Parser ModuleBodyVariant
 pModuleBodyVariant = p <?> name where
@@ -245,8 +247,8 @@ pSigSpecConcat = p <?> name where
     p =
         do
         char '{' <* pWs
-        sigspecs    <- pSigSpec `sepBy` pWs
-        pWs <* char '}'
+        sigspecs    <- many $ pSigSpec <* pWs
+        char '}'
         return $ SigSpecConcat sigspecs
 
 applySlices :: SigSpec -> Parser SigSpec
@@ -331,7 +333,7 @@ pMemoryStmt = p <?> name where
     p =
         do
         (string "memory" <* pWs)
-        options     <- (many pMemoryOption <* pWs)
+        options     <- (many pMemoryOption <* pMaybeWs)
         memoryId    <- MemoryID <$> pId
         advanceToNextToken
         return $ MemoryStmt memoryId options
@@ -439,8 +441,8 @@ pProcessBody = p <?> name where
         -- character being an 'a' would have been consumed.
         assignStmts <- many $ try pAssignStmt
         switch      <- many $ try pSwitch
-        -- syncs       <- many pSync
-        return $ ProcessBody [] [] []
+        syncs       <- many pSync
+        return $ ProcessBody assignStmts switch syncs
 
 pAssignStmt :: Parser AssignStmt
 pAssignStmt = p <?> name where
@@ -488,7 +490,6 @@ pCase = p <?> name where
         caseStmt <- pCaseStmt
         caseBody <- pCaseBody
         return $ Case caseStmt attrs caseBody
-        -- return $ Case (CaseStmt Nothing) attrs (CaseBody [])
 
 pCaseStmt :: Parser CaseStmt
 pCaseStmt = p <?> name where
@@ -496,7 +497,7 @@ pCaseStmt = p <?> name where
     p =
         CaseStmt
         <$> (
-            string "case" *> pWs
+            string "case" *> pMaybeWs
             *> optionMaybe pCompare
             <* advanceToNextToken)
 
@@ -512,8 +513,8 @@ pCaseBody = p <?> name where
     name = "CaseBody"
     p =
         CaseBody
-        <$> many pAssignStmt
-        <*> many pSwitch
+        <$> many (try pAssignStmt)
+        <*> many (try pSwitch)
 
 pCaseBodyVariant :: Parser CaseBodyVariants
 pCaseBodyVariant = p <?> name where

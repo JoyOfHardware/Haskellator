@@ -65,7 +65,7 @@ data AutogenId      = AutogenId     String  deriving (Show)
 -- values
 data Value = Value
     { width :: Int
-    , value :: Int
+    , binaryValue :: String
     }
     deriving (Show)
 
