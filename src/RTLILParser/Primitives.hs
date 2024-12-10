@@ -6,6 +6,7 @@ module RTLILParser.Primitives(
    ,pOctal
    ,pEscapedChar
    ,advanceToNextToken
+   ,advanceToFirstToken
 ) where
 
 import Control.Monad (void)
@@ -48,11 +49,23 @@ pEol = void (many1 (oneOf "\r\n") <* pMaybeWs)
 -- a comment begins with # and ends at the end of the line
 -- a comment can be be inline, but must still end at the end of the line
 pComment :: Parser String
-pComment = do
-  char '#'
-  comment <- many (noneOf "\r\n")
-  pEol
-  return comment
+pComment = p <?> name where
+    name = "Comment"
+    p =
+        do
+        char '#'
+        comment <- many (noneOf "\r\n")
+        pEol
+        return comment
 
 advanceToNextToken :: Parser ()
-advanceToNextToken = void (pMaybeWs *> many1 (void pComment <|> pEol))
+advanceToNextToken = p <?> name where
+    name = "AdvanceToNextToken" 
+    p = 
+        void (pMaybeWs *> many1 (void pComment <|> pEol))
+
+advanceToFirstToken :: Parser ()
+advanceToFirstToken = p <?> name where
+    name = "AdvanceToFirstToken"
+    p = 
+        void (pMaybeWs *> many (void pComment <|> pEol))

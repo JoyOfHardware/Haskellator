@@ -72,7 +72,7 @@ data Value = Value
 -- strings
 -- comments
 -- file
-data File           = File AutoIdxStmt [Module] deriving (Show)
+data File           = File (Maybe AutoIdxStmt) [Module] deriving (Show)
 
 -- Autoindex statements
 data AutoIdxStmt    = AutoIdxStmt   Int     deriving (Show)
@@ -81,11 +81,12 @@ data AutoIdxStmt    = AutoIdxStmt   Int     deriving (Show)
 data Module         = Module ModuleStmt [AttrStmt] ModuleBody deriving (Show)
 data ModuleStmt     = ModuleStmt Id deriving (Show)
 data ModuleBody     = ModuleBody [ModuleBodyVariant] deriving (Show)
-data ModuleBodyVariant  = ModuleBodyParamStmt ParamStmt
-                        | ModuleBodyWire Wire
-                        | ModuleBodyMemory Memory
-                        | ModuleBodyCell Cell
-                        | ModuleBodyProcess Process
+data ModuleBodyVariant  = ModuleBodyParamStmt   ParamStmt
+                        | ModuleBodyWire        Wire
+                        | ModuleBodyMemory      Memory
+                        | ModuleBodyCell        Cell
+                        | ModuleBodyProcess     Process
+                        | ModuleBodyConnStmt    ConnStmt
                         deriving (Show)
 data ParamStmt      = ParamStmt Id (Maybe Constant) deriving (Show)
 data Constant       = ConstantValue   Value
@@ -149,8 +150,7 @@ data Process        = Process ProcStmt [AttrStmt] ProcessBody
 data ProcStmt       = ProcStmt Id deriving (Show)
 data ProcessBody    = ProcessBody 
                         [AssignStmt]
-                        (Maybe Switch)
-                        [AssignStmt] 
+                        [Switch]
                         [Sync] 
                     deriving (Show)
 data AssignStmt     = AssignStmt  DestSigSpec SrcSigSpec
@@ -171,7 +171,7 @@ data Compare        = Compare [SigSpec]
 data CaseBodyVariants   = CaseBodySwitchVariant Switch
                         | CaseBodyAssignVariant AssignStmt
                         deriving (Show)
-data CaseBody       = CaseBody [CaseBodyVariants] deriving (Show)
+data CaseBody       = CaseBody [AssignStmt] [Switch] deriving (Show)
 
 -- Syncs
 data Sync           = Sync SyncStmt [UpdateStmt] deriving (Show)

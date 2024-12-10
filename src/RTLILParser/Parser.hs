@@ -62,6 +62,7 @@ import RTLILParser.Primitives(
    ,pOctal
    ,pEscapedChar
    ,advanceToNextToken
+   ,advanceToFirstToken
     )
 
 -- taken from: https://yosyshq.readthedocs.io/projects/yosys/en/0.47/appendix/rtlil_text.html
@@ -134,7 +135,7 @@ pFile = p <?> name where
     name = "File"
     p =
         File
-        <$> (advanceToNextToken *> pAutoIdxStmt)
+        <$> (advanceToFirstToken *> optionMaybe (try pAutoIdxStmt))
         <*> many pModule
 
 -- Autoindex statements
@@ -189,7 +190,8 @@ pModuleBodyVariant = p <?> name where
         try (ModuleBodyWire         <$> pWire     ) <|>
         try (ModuleBodyMemory       <$> pMemory   ) <|>
         try (ModuleBodyCell         <$> pCell     ) <|>
-        try (ModuleBodyProcess      <$> pProcess  )
+        try (ModuleBodyProcess      <$> pProcess  ) <|>
+        try (ModuleBodyConnStmt     <$> pConnStmt )
 
 pParamStmt :: Parser ParamStmt
 pParamStmt = p <?> name where
@@ -435,11 +437,10 @@ pProcessBody = p <?> name where
         -- with the character 'a', we need to be able to rewind failed
         -- attempts for `pAssignStmt` and `pSwitch` parsers as the first
         -- character being an 'a' would have been consumed.
-        assignStmtsBefore   <- many $ try pAssignStmt
-        switch              <- optionMaybe $ try pSwitch
-        assignStmtsAfter    <- many pAssignStmt
-        syncs               <- many pSync
-        return $ ProcessBody assignStmtsBefore switch assignStmtsAfter syncs
+        assignStmts <- many $ try pAssignStmt
+        switch      <- many $ try pSwitch
+        -- syncs       <- many pSync
+        return $ ProcessBody [] [] []
 
 pAssignStmt :: Parser AssignStmt
 pAssignStmt = p <?> name where
@@ -507,7 +508,12 @@ pCompare = p <?> name where
         <$> pSigSpec `sepBy` (pMaybeWs *> char ',' *> pMaybeWs)
 
 pCaseBody :: Parser CaseBody
-pCaseBody = (CaseBody <$> many pCaseBodyVariant) <?> "CaseBody"
+pCaseBody = p <?> name where
+    name = "CaseBody"
+    p =
+        CaseBody
+        <$> many pAssignStmt
+        <*> many pSwitch
 
 pCaseBodyVariant :: Parser CaseBodyVariants
 pCaseBodyVariant = p <?> name where

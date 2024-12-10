@@ -6,8 +6,7 @@
  - [ ] need canonical form making it easy to run all these validation 
        passes
  - [ ] are recursive slices inclusive?
- - [ ] what are the semantics of connection `<conn-stmt>`? Where is 
-       `<conn-stmt>` employed?
+ - [ ] what are the semantics of connection `<conn-stmt>`?
  - [ ] Validate that `123456789[0:9][0:8]` is valid RTLIL
  - [ ] add validation section to README
  - [ ] just support Cell memV2
