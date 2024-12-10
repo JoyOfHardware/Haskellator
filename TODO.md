@@ -45,6 +45,8 @@
  - [ ] Embed locs in AST
  - [ ] Scrap `pEolAndAdvanceToNextNonWs` and use `tok`
  - [ ] Remove `preProcessDiscardComments` from exports
+ - [ ] Install README in dir containing `Parser.hs`
+ - [ ] Discuss deviations of parser against Yosys behaviors
  - [x] Are the `try` statements in `pWireOption` correctly constructed?
  - [ ] Consider the very weird case where the process body has nothing,
        thus, `pEolAndAdvanceToNextNonWs` may never get invoked in any of
