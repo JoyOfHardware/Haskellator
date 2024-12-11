@@ -30,12 +30,26 @@ input, and just have fun!
 
 # Status
 
-Right now Haskellator can successfully parse some valid RTLIL into [an AST](./src/RTLIL/Syntax.hs).
-We are currently working on expanding the RTLIL that can be parsed to include
-[RTLIL](https://github.com/YosysHQ/yosys/blob/main/kernel/rtlil.h) 
-emitted from Amaranth Lang.
+Right now Haskellator can successfully parse RTLIL emitted from 
+Amaranth lang as well as RTLIL emitted from running Yosys
+over large VexRISCV designs.
 
-Currently targetting RTLIL in Yosys .47.
+You can generate an RTLIL corpus to test Haskellator against right
+from this repo by doing the following:
+
+```bash
+git clone --recursive git@github.com:JoyOfHardware/Haskellator.git
+pushd rtlil-corpus; nix-shell; exit; popd
+```
+
+Now run a command like the following to parse some rtlil into Haskell 
+data structures found in `src/RTLILParser/AST.hs`.
+
+```bash
+nix-shell
+rtlil-parse rtlil-corpus/corpus/gpio.il gpio.hs
+Output written to gpio.hs
+```
 
 # Usage
 
@@ -59,9 +73,12 @@ $ rtlil-parse rtlil_file.il parsed_ast.hs
 
 # Limitations
  - Does not support propagating non-two state logic, that is, no
-   support for X or Z values. Default behavior is to reject such
-   input although future iterations may support initializing X and
-   Z to 0.
+   support for X or Z values. Default behavior is to successfully 
+   parser such input. In the future, we will have validation phases
+   that reject circuits with X or Z values.
+
+   We may eventually support initializing X and Z values to 0.
+
  - All cycles in circuit graphs must have at one D Flip-Flop on the
    cycle path. This requirement necesarily pre-cludes simulation of
    circuits such as NAND level-resolution SRAMs. The main reason for
@@ -73,7 +90,10 @@ $ rtlil-parse rtlil_file.il parsed_ast.hs
    as asynchronous FIFOs, but I plan to make sure simulation of such
    circuits is possible and correct.
 
-# Lessons Learned
- - Should have written parser to be token based where after consuming
-   and capturing token, we consume and discard all following whitespaces
-   as well as comments...
+# Sponsors
+
+<p align="center">
+    <a href="https://NLnet.nl">
+        <img src="assets/nlnet_logo.png" width="269" alt="Logo NLnet">
+    </a>
+</p>
