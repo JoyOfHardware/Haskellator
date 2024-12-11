@@ -47,7 +47,7 @@ AST for the given input `il` file.
 ```bash
 git clone --recursive git@github.com:JoyOfHardware/Haskellator.git
 $ nix-shell
-$ rtlil-parse
+$ rtlil-parse rtlil_file.il parsed_ast.hs
 ```
 
 # TODO
