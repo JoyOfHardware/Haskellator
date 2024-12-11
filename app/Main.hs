@@ -1,7 +1,6 @@
 module Main where
 
 import System.Environment (getArgs)
-import System.IO
 import Control.Exception (catch, IOException)
 import Text.Show.Pretty (ppShow)
 
@@ -12,15 +11,19 @@ main = do
     -- Get the command-line arguments
     args <- getArgs
 
-    -- Check if a file name is provided
+    -- Check if the input and output file names are provided
     case args of
-        (filePath:_) -> do
-            -- Attempt to read the file
-            contents <- catch (readFile filePath) handleReadError
-            putStrLn $ ppShow $ Haskellator.runParser contents filePath
-        [] -> putStrLn "cabal run Haskellator -- <file-path>"
-    -- putStrLn $ ppShow Haskellator.val
+        (inputFilePath:outputFilePath:_) -> do
+            contents <- catch (readFile inputFilePath) handleReadError
+            let output = ppShow $ Haskellator.runParser contents inputFilePath
+            catch (writeFile outputFilePath output) handleWriteError
+            putStrLn $ "Output written to " ++ outputFilePath
+        _ -> putStrLn "Usage: cabal run rtlil-parse -- <input-file-path> <output-file-path>"
 
 -- Handle potential file reading errors
 handleReadError :: IOException -> IO String
-handleReadError _ = return "Error: Could not read the file."
+handleReadError _ = return "Error: Could not read the input file."
+
+-- Handle potential file writing errors
+handleWriteError :: IOException -> IO ()
+handleWriteError _ = putStrLn "Error: Could not write to the output file."

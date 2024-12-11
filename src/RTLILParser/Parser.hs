@@ -1,7 +1,4 @@
-module RTLILParser.Parser(
-    RTLILParser.Parser.runParser,
-    a,
-    val) where
+module RTLILParser.Parser(RTLILParser.Parser.runParser) where
 
 import Control.Monad (void)
 import Text.Parsec
@@ -52,7 +49,7 @@ import RTLILParser.AST (
     CaseBodyVariants(..), CaseBody(..),
 
     -- Syncs
-    Sync(..), SyncStmt(..), SyncType(..), UpdateStmt(..)
+    Sync(..), SyncStmt(..), SyncType(..), UpdateStmtVariants(..)
     )
 import RTLILParser.Primitives(
     pWs
@@ -68,7 +65,7 @@ import RTLILParser.Primitives(
 -- taken from: https://yosyshq.readthedocs.io/projects/yosys/en/0.47/appendix/rtlil_text.html
 -- parsers below are split int sections from the above link
 
-runParser :: String -> SourceName -> File
+-- runParser :: String -> SourceName -> File
 runParser str filename = case parse pFile filename str of
     Left err -> error $ show err
     Right val -> val
@@ -159,7 +156,6 @@ pModule = p <?> name where
         moduleStmt  <- pModuleStmt
         moduleBody  <- pModuleBody
         pModuleEndStmt
-        -- return $ Module moduleStmt attrs $ModuleBody []
         return $ Module moduleStmt attrs moduleBody
 
 pModuleStmt :: Parser ModuleStmt
@@ -216,7 +212,7 @@ pModuleEndStmt :: Parser ()
 pModuleEndStmt = p <?> name where
     name = "ModuleEndStmt"
     p =
-        void (string "end")
+        void (string "end" <* advanceToNextToken)
 
 -- Attribute statements
 pAttrStmt :: Parser AttrStmt
@@ -332,8 +328,8 @@ pMemoryStmt = p <?> name where
     name = "MemoryStmt"
     p =
         do
-        (string "memory" <* pWs)
-        options     <- (many pMemoryOption <* pMaybeWs)
+        string "memory" <* pWs
+        options     <- many (try (pMemoryOption <* pMaybeWs))
         memoryId    <- MemoryID <$> pId
         advanceToNextToken
         return $ MemoryStmt memoryId options
@@ -534,15 +530,15 @@ pSync = p <?> name where
     p =
         Sync
         <$> pSyncStmt
-        <*> many pUpdateStmt
+        <*> many ((try pUpdateStmt) <|> (try pMemWrStmt))
 
 pSyncStmt :: Parser SyncStmt
 pSyncStmt =  p <?> name where
     name = "SyncStmt"
     p =
         pKeywordSync *>
-                    pSigSpecPredicatedSyncStmt <|>
-                    pNonSigSpecPredicatedSyncStmt
+                    (pSigSpecPredicatedSyncStmt <|>
+                    pNonSigSpecPredicatedSyncStmt)
                     where pKeywordSync = string "sync" *> pWs
 
 pSigSpecPredicatedSyncStmt :: Parser SyncStmt
@@ -574,7 +570,7 @@ pSyncType = p <?> name where
         (Negedge    <$ string "negedge" )   <|>
         (Edge       <$ string "edge"    )
 
-pUpdateStmt :: Parser UpdateStmt
+pUpdateStmt :: Parser UpdateStmtVariants
 pUpdateStmt = p <?> name where
     name = "UpdateStmt"
     p =
@@ -582,19 +578,16 @@ pUpdateStmt = p <?> name where
         <$> (string "update" *> pWs *> pDestSigSpec)
         <*> (pWs *> pSrcSigSpec <* advanceToNextToken)
 
--- would correspond to `123456789[0:9][0:8]`
-exampleSigSpecSlice =
-    SigSpecSlice
-        (
-            SigSpecSlice
-            (SigSpecConstant (ConstantInteger 123456789))
-                (Slice 0 $ Just 9)
-        )
-            (Slice 0 $ Just 8)
-
--- val = parse pInteger "pInteger" "721"
--- val = parse pModuleStmt "pModuleStmt" "module \\top\n"
-val = parse pSigSpec "pSigSpecSlice" "123456789[0:9][0:8]"
-
-a :: Int
-a = 3
+pMemWrStmt :: Parser UpdateStmtVariants
+pMemWrStmt = p <?> name where
+    name = "MemWrStmt"
+    p =
+        do
+        attrStmts   <- many (try pAttrStmt)
+        string "memwr"
+        id          <- pWs *> pId
+        sigSpec     <- pWs *> pSigSpec
+        sigSpec     <- pWs *> pSigSpec
+        sigSpec     <- pWs *> pSigSpec
+        constant    <- pWs *> pConstant <* advanceToNextToken
+        return $ MemWrStmt id sigSpec sigSpec sigSpec constant attrStmts

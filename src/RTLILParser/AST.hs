@@ -43,7 +43,7 @@ module RTLILParser.AST (
     CaseBodyVariants(..), CaseBody(..),
 
     -- Syncs
-    Sync(..), SyncStmt(..), SyncType(..), UpdateStmt(..)
+    Sync(..), SyncStmt(..), SyncType(..), UpdateStmtVariants(..)
 
 
 ) where
@@ -174,7 +174,7 @@ data CaseBodyVariants   = CaseBodySwitchVariant Switch
 data CaseBody       = CaseBody [AssignStmt] [Switch] deriving (Show)
 
 -- Syncs
-data Sync           = Sync SyncStmt [UpdateStmt] deriving (Show)
+data Sync           = Sync SyncStmt [UpdateStmtVariants] deriving (Show)
 data SyncStmt       = SigSpecPredicated SigSpec SyncType
                     | Global
                     | Init
@@ -186,4 +186,6 @@ data SyncType       = Low
                     | Negedge
                     | Edge
                     deriving (Show)
-data UpdateStmt     = UpdateStmt DestSigSpec SrcSigSpec deriving (Show)
+data UpdateStmtVariants = UpdateStmt DestSigSpec SrcSigSpec
+                        | MemWrStmt  Id SigSpec SigSpec SigSpec Constant [AttrStmt]
+                        deriving (Show)

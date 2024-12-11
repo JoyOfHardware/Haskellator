@@ -1,9 +1,3 @@
-module Haskellator(
-    val,
-    runParser
-    ) where
+module Haskellator(runParser) where
 
-    import RTLILParser.Parser(
-        val,
-        runParser,
-        )
+    import RTLILParser.Parser(runParser)
