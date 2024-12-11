@@ -6,10 +6,15 @@
 }:
 
 let
-  haskellator = pkgs.callPackage ./default.nix {};
+  haskellator = pkgs.callPackage ./default.nix { };
+  corpus = pkgs.callPackage ./rtlil-corpus/default.nix { };
 in
-pkgs.mkShell {
-  buildInputs = [
-    haskellator
+pkgs.callPackage (
+  { mkShell }:
+  mkShell {
+    CORPUS = corpus;
+    nativeBuildInputs = [
+      haskellator
     ];
-}
+  }
+) { }
