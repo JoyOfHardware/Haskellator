@@ -45,6 +45,7 @@ The following will allow you to see a pretty printed
 AST for the given input `il` file.
 
 ```bash
+git clone --recursive git@github.com:JoyOfHardware/Haskellator.git
 $ nix-shell
 $ rtlil-parse
 ```

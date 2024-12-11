@@ -1,0 +1,3 @@
+[submodule "rtlil-corpus"]
+	path = rtlil-corpus
+	url = git@github.com:JoyOfHardware/rtlil-corpus.git
