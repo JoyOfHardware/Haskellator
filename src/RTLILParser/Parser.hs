@@ -246,7 +246,7 @@ pSigSpecConcat = p <?> name where
     name = "SigSpecConcat"
     p =
         do
-        char '{' <* pWs
+        char '{' <* pMaybeWs
         sigspecs    <- many $ pSigSpec <* pWs
         char '}'
         return $ SigSpecConcat sigspecs
